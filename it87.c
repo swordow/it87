@@ -3412,12 +3412,9 @@ static void it87_start_monitoring(struct it87_data *data)
 			 | (update_vbat ? 0x41 : 0x01));
 }
 
-/* Called when we have found a new IT87. */
-static void it87_init_device(struct platform_device *pdev)
+static void it87_init_regs(struct platform_device *pdev)
 {
-	struct it87_sio_data *sio_data = dev_get_platdata(&pdev->dev);
 	struct it87_data *data = platform_get_drvdata(pdev);
-	int tmp, i;
 
 	/* Initialize chip specific register pointers */
 	switch (data->type) {
@@ -3453,15 +3450,15 @@ static void it87_init_device(struct platform_device *pdev)
 		data->REG_TEMP_HIGH = IT87_REG_TEMP_HIGH;
 		break;
 	case it8613:
-                data->REG_FAN = IT87_REG_FAN;
-                data->REG_FANX = IT87_REG_FANX;
-                data->REG_FAN_MIN = IT87_REG_FAN_MIN;
-                data->REG_FANX_MIN = IT87_REG_FANX_MIN;
-                data->REG_PWM = IT87_REG_PWM_8665;
-                data->REG_TEMP_OFFSET = IT87_REG_TEMP_OFFSET;
-                data->REG_TEMP_LOW = IT87_REG_TEMP_LOW;
-                data->REG_TEMP_HIGH = IT87_REG_TEMP_HIGH;
-                break;
+		data->REG_FAN = IT87_REG_FAN;
+		data->REG_FANX = IT87_REG_FANX;
+		data->REG_FAN_MIN = IT87_REG_FAN_MIN;
+		data->REG_FANX_MIN = IT87_REG_FANX_MIN;
+		data->REG_PWM = IT87_REG_PWM_8665;
+		data->REG_TEMP_OFFSET = IT87_REG_TEMP_OFFSET;
+		data->REG_TEMP_LOW = IT87_REG_TEMP_LOW;
+		data->REG_TEMP_HIGH = IT87_REG_TEMP_HIGH;
+		break;
 	default:
 		data->REG_FAN = IT87_REG_FAN;
 		data->REG_FANX = IT87_REG_FANX;
@@ -3473,6 +3470,14 @@ static void it87_init_device(struct platform_device *pdev)
 		data->REG_TEMP_HIGH = IT87_REG_TEMP_HIGH;
 		break;
 	}
+}
+
+/* Called when we have found a new IT87. */
+static void it87_init_device(struct platform_device *pdev)
+{
+	struct it87_sio_data *sio_data = dev_get_platdata(&pdev->dev);
+	struct it87_data *data = platform_get_drvdata(pdev);
+	int tmp, i;
 
 	/*
 	 * For each PWM channel:
@@ -3674,6 +3679,9 @@ static int it87_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, data);
 
 	mutex_init(&data->update_lock);
+
+	/* Initialize register pointers */
+	it87_init_regs(pdev);
 
 	/* Check PWM configuration */
 	enable_pwm_interface = it87_check_pwm(dev);
