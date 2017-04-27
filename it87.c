@@ -2830,8 +2830,8 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 		sio_data->type = it8607;
 		break;
 	case IT8613E_DEVID:
-                sio_data->type = it8613;
-                break;
+		sio_data->type = it8613;
+		break;
 	case IT8620E_DEVID:
 		sio_data->type = it8620;
 		break;
