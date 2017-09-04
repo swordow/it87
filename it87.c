@@ -326,6 +326,7 @@ struct it87_devices {
 	u32 features;
 	u8 num_temp_limit;
 	u8 num_temp_offset;
+	u8 num_temp_map;	/* Number of temperature sources for pwm */
 	u8 peci_mask;
 	u8 old_peci_mask;
 };
@@ -364,6 +365,7 @@ static const struct it87_devices it87_devices[] = {
 						/* may need to overwrite */
 		.num_temp_limit = 3,
 		.num_temp_offset = 0,
+		.num_temp_map = 3,
 	},
 	[it8712] = {
 		.name = "it8712",
@@ -372,6 +374,7 @@ static const struct it87_devices it87_devices[] = {
 						/* may need to overwrite */
 		.num_temp_limit = 3,
 		.num_temp_offset = 0,
+		.num_temp_map = 3,
 	},
 	[it8716] = {
 		.name = "it8716",
@@ -381,6 +384,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_FANCTL_ONOFF,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 3,
 	},
 	[it8718] = {
 		.name = "it8718",
@@ -390,6 +394,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_PWM_FREQ2 | FEAT_FANCTL_ONOFF,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 3,
 		.old_peci_mask = 0x4,
 	},
 	[it8720] = {
@@ -400,6 +405,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_PWM_FREQ2 | FEAT_FANCTL_ONOFF,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 3,
 		.old_peci_mask = 0x4,
 	},
 	[it8721] = {
@@ -411,6 +417,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_PWM_FREQ2 | FEAT_SCALING | FEAT_FANCTL_ONOFF,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 3,
 		.peci_mask = 0x05,
 		.old_peci_mask = 0x02,	/* Actually reports PCH */
 	},
@@ -423,6 +430,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_FANCTL_ONOFF,
 		.num_temp_limit = 6,
 		.num_temp_offset = 3,
+		.num_temp_map = 3,
 		.peci_mask = 0x07,
 	},
 	[it8732] = {
@@ -434,6 +442,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_FOUR_PWM | FEAT_FANCTL_ONOFF,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 3,
 		.peci_mask = 0x07,
 		.old_peci_mask = 0x02,	/* Actually reports PCH */
 	},
@@ -449,6 +458,7 @@ static const struct it87_devices it87_devices[] = {
 				/* three fans, always 16 bit (guesswork) */
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 3,
 		.peci_mask = 0x07,
 	},
 	[it8772] = {
@@ -463,6 +473,7 @@ static const struct it87_devices it87_devices[] = {
 				/* three fans, always 16 bit (datasheet) */
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 3,
 		.peci_mask = 0x07,
 	},
 	[it8781] = {
@@ -473,6 +484,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_FANCTL_ONOFF,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 3,
 		.old_peci_mask = 0x4,
 	},
 	[it8782] = {
@@ -483,6 +495,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_FANCTL_ONOFF,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 3,
 		.old_peci_mask = 0x4,
 	},
 	[it8783] = {
@@ -493,6 +506,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_FANCTL_ONOFF,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 3,
 		.old_peci_mask = 0x4,
 	},
 	[it8786] = {
@@ -503,6 +517,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_PWM_FREQ2 | FEAT_FANCTL_ONOFF,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 3,
 		.peci_mask = 0x07,
 	},
 	[it8790] = {
@@ -513,6 +528,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_IN7_INTERNAL | FEAT_PWM_FREQ2 | FEAT_FANCTL_ONOFF,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 3,
 		.peci_mask = 0x07,
 	},
 	[it8792] = {
@@ -523,6 +539,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_IN7_INTERNAL | FEAT_PWM_FREQ2 | FEAT_FANCTL_ONOFF,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 3,
 		.peci_mask = 0x07,
 	},
 	[it8603] = {
@@ -533,17 +550,19 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_AVCC3 | FEAT_PWM_FREQ2 | FEAT_SCALING,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 4,
 		.peci_mask = 0x07,
 	},
 	[it8607] = {
 		.name = "it8607",
 		.suffix = "E",
 		.features = FEAT_NEWER_AUTOPWM | FEAT_12MV_ADC | FEAT_16BIT_FANS
-		  | FEAT_TEMP_PECI | FEAT_IN7_INTERNAL
+		  | FEAT_TEMP_PECI | FEAT_IN7_INTERNAL | FEAT_NEW_TEMPMAP
 		  | FEAT_AVCC3 | FEAT_PWM_FREQ2 | FEAT_SCALING
 		  | FEAT_FANCTL_ONOFF,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 6,
 		.peci_mask = 0x07,
 	},
 	[it8613] = {
@@ -555,6 +574,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_AVCC3 | FEAT_SCALING | FEAT_NEW_TEMPMAP,
 		.num_temp_limit = 6,
 		.num_temp_offset = 6,
+		.num_temp_map = 6,
 		.peci_mask = 0x07,
 	},
 	[it8620] = {
@@ -567,6 +587,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_FANCTL_ONOFF,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 3,
 		.peci_mask = 0x07,
 	},
 	[it8622] = {
@@ -578,6 +599,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_AVCC3 | FEAT_VIN3_5V | FEAT_SCALING,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
+		.num_temp_map = 4,
 		.peci_mask = 0x07,
 	},
 	[it8625] = {
@@ -589,6 +611,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_SIX_PWM | FEAT_BANK_SEL | FEAT_SCALING,
 		.num_temp_limit = 6,
 		.num_temp_offset = 6,
+		.num_temp_map = 6,
 	},
 	[it8628] = {
 		.name = "it8628",
@@ -600,6 +623,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_FANCTL_ONOFF,
 		.num_temp_limit = 6,
 		.num_temp_offset = 3,
+		.num_temp_map = 3,
 		.peci_mask = 0x07,
 	},
 	[it8655] = {
@@ -610,6 +634,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_10_9MV_ADC | FEAT_IN7_INTERNAL | FEAT_BANK_SEL,
 		.num_temp_limit = 6,
 		.num_temp_offset = 6,
+		.num_temp_map = 6,
 	},
 	[it8665] = {
 		.name = "it8665",
@@ -620,6 +645,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_SIX_PWM | FEAT_BANK_SEL,
 		.num_temp_limit = 6,
 		.num_temp_offset = 6,
+		.num_temp_map = 6,
 	},
 	[it8686] = {
 		.name = "it8686",
@@ -630,6 +656,7 @@ static const struct it87_devices it87_devices[] = {
 		  | FEAT_SIX_TEMP | FEAT_BANK_SEL | FEAT_SCALING | FEAT_AVCC3,
 		.num_temp_limit = 6,
 		.num_temp_offset = 6,
+		.num_temp_map = 7,
 	},
 };
 
@@ -752,6 +779,9 @@ struct it87_data {
 	u8 pwm_ctrl[NUM_PWM];	/* Register value */
 	u8 pwm_duty[NUM_PWM];	/* Manual PWM value set by user */
 	u8 pwm_temp_map[NUM_PWM];/* PWM to temp. chan. mapping (bits 1-0) */
+	u8 pwm_temp_map_mask;	/* 0x03 for old, 0x07 for new temp map */
+	u8 pwm_temp_map_shift;	/* 0 for old, 3 for new temp map */
+	u8 pwm_num_temp_map;	/* from config data, 3..7 depending on chip */
 
 	/* Automatic fan speed control registers */
 	u8 auto_pwm[NUM_AUTO_PWM][4];	/* [nr][3] is hard-coded */
@@ -838,6 +868,25 @@ static int DIV_TO_REG(int val)
 
 #define DIV_FROM_REG(val) BIT(val)
 
+static u8 temp_map_from_reg(const struct it87_data *data, u8 reg)
+{
+	u8 map;
+
+	map  = (reg >> data->pwm_temp_map_shift) & data->pwm_temp_map_mask;
+	if (map >= data->pwm_num_temp_map)	/* map is 0-based */
+		map = 0;
+
+	return map;
+}
+
+static u8 temp_map_to_reg(const struct it87_data *data, int nr, u8 map)
+{
+	u8 ctrl = data->pwm_ctrl[nr];
+
+	return (ctrl & ~(data->pwm_temp_map_mask << data->pwm_temp_map_shift)) |
+	       (map << data->pwm_temp_map_shift);
+}
+
 /*
  * PWM base frequencies. The frequency has to be divided by either 128 or 256,
  * depending on the chip type, to calculate the actual PWM frequency.
@@ -907,19 +956,19 @@ static void it87_write_value(struct it87_data *data, u16 reg, u8 value)
 
 static void it87_update_pwm_ctrl(struct it87_data *data, int nr)
 {
-	data->pwm_ctrl[nr] = it87_read_value(data, data->REG_PWM[nr]);
+	u8 ctrl;
+
+	ctrl = it87_read_value(data, data->REG_PWM[nr]);
+	data->pwm_ctrl[nr] = ctrl;
 	if (has_newer_autopwm(data)) {
-		if (has_new_tempmap(data))
-			data->pwm_temp_map[nr] = data->pwm_ctrl[nr] & 0x38;
-		else
-			data->pwm_temp_map[nr] = data->pwm_ctrl[nr] & 0x03;
+		data->pwm_temp_map[nr] = temp_map_from_reg(data, ctrl);
 		data->pwm_duty[nr] = it87_read_value(data,
 						     IT87_REG_PWM_DUTY[nr]);
 	} else {
-		if (data->pwm_ctrl[nr] & 0x80)	/* Automatic mode */
-			data->pwm_temp_map[nr] = data->pwm_ctrl[nr] & 0x03;
+		if (ctrl & 0x80)	/* Automatic mode */
+			data->pwm_temp_map[nr] = temp_map_from_reg(data, ctrl);
 		else				/* Manual mode */
-			data->pwm_duty[nr] = data->pwm_ctrl[nr] & 0x7f;
+			data->pwm_duty[nr] = ctrl & 0x7f;
 	}
 
 	if (has_old_autopwm(data)) {
@@ -1647,8 +1696,8 @@ static ssize_t set_pwm_enable(struct device *dev, struct device_attribute *attr,
 					 data->pwm_duty[nr]);
 			/* and set manual mode */
 			if (has_newer_autopwm(data)) {
-				ctrl = (data->pwm_ctrl[nr] & 0x7c) |
-					data->pwm_temp_map[nr];
+				ctrl = temp_map_to_reg(data, nr,
+						       data->pwm_temp_map[nr]);
 			} else {
 				ctrl = data->pwm_duty[nr];
 			}
@@ -1659,8 +1708,8 @@ static ssize_t set_pwm_enable(struct device *dev, struct device_attribute *attr,
 		u8 ctrl;
 
 		if (has_newer_autopwm(data)) {
-			ctrl = (data->pwm_ctrl[nr] & 0x7c) |
-				data->pwm_temp_map[nr];
+			ctrl = temp_map_to_reg(data, nr,
+					       data->pwm_temp_map[nr]);
 			if (val != 1)
 				ctrl |= 0x80;
 		} else {
@@ -1764,21 +1813,8 @@ static ssize_t show_pwm_temp_map(struct device *dev,
 	struct sensor_device_attribute *sensor_attr = to_sensor_dev_attr(attr);
 	struct it87_data *data = it87_update_device(dev);
 	int nr = sensor_attr->index;
-	int map;
 
-	map = data->pwm_temp_map[nr];
-	if (has_new_tempmap(data)) {
-		map >>= 3;
-		if (map >= 6)
-			map = 0;	/* Should never happen */
-	} else {
-		if (map >= 3)
-			map = 0;	/* Should never happen */
-		if (nr >= 3)		/* pwm channels 3..6 map to temp4..6 */
-			map += 3;
-	}
-
-	return sprintf(buf, "%d\n", (int)BIT(map));
+	return sprintf(buf, "%d\n", data->pwm_temp_map[nr] + 1);
 }
 
 static ssize_t set_pwm_temp_map(struct device *dev,
@@ -1788,58 +1824,26 @@ static ssize_t set_pwm_temp_map(struct device *dev,
 	struct sensor_device_attribute *sensor_attr = to_sensor_dev_attr(attr);
 	struct it87_data *data = dev_get_drvdata(dev);
 	int nr = sensor_attr->index;
-	long val;
-	u8 reg;
+	unsigned long val;
+	u8 map;
 
-	if (kstrtol(buf, 10, &val) < 0)
+	if (kstrtoul(buf, 10, &val) < 0)
 		return -EINVAL;
 
-	if (nr >= 3 && !has_new_tempmap(data))
-		val -= 3;
-
-	switch (val) {
-	case BIT(0):
-		reg = 0x00;
-		break;
-	case BIT(1):
-		reg = 0x01;
-		break;
-	case BIT(2):
-		reg = 0x02;
-		break;
-	case BIT(3):
-		reg = 0x03;
-		break;
-	case BIT(4):
-		reg = 0x04;
-		break;
-	case BIT(5):
-		reg = 0x05;
-		break;
-	case BIT(6):
-		reg = 0x06;
-		break;
-	default:
+	if (!val || val > data->pwm_num_temp_map)
 		return -EINVAL;
-	}
 
-	if (has_new_tempmap(data))
-		reg <<= 3;
-	else if (reg > 0x02)
-		return -EINVAL;
+	map = val - 1;
 
 	mutex_lock(&data->update_lock);
 	it87_update_pwm_ctrl(data, nr);
-	data->pwm_temp_map[nr] = reg;
+	data->pwm_temp_map[nr] = map;
 	/*
 	 * If we are in automatic mode, write the temp mapping immediately;
 	 * otherwise, just store it for later use.
 	 */
 	if (data->pwm_ctrl[nr] & 0x80) {
-		u8 mask = has_new_tempmap(data) ? 0xc7 : 0xfc;
-
-		data->pwm_ctrl[nr] = (data->pwm_ctrl[nr] & mask) |
-						data->pwm_temp_map[nr];
+		data->pwm_ctrl[nr] = temp_map_to_reg(data, nr, map);
 		it87_write_value(data, data->REG_PWM[nr], data->pwm_ctrl[nr]);
 	}
 	mutex_unlock(&data->update_lock);
@@ -3521,13 +3525,21 @@ static void it87_init_device(struct platform_device *pdev)
 	struct it87_data *data = platform_get_drvdata(pdev);
 	int tmp, i;
 
+	if (has_new_tempmap(data)) {
+		data->pwm_temp_map_shift = 3;
+		data->pwm_temp_map_mask = 0x07;
+	} else {
+		data->pwm_temp_map_shift = 0;
+		data->pwm_temp_map_mask = 0x03;
+	}
+
 	/*
 	 * For each PWM channel:
 	 * - If it is in automatic mode, setting to manual mode should set
 	 *   the fan to full speed by default.
 	 * - If it is in manual mode, we need a mapping to temperature
 	 *   channels to use when later setting to automatic mode later.
-	 *   Use a 1:1 mapping by default (we are clueless.)
+	 *   Map to the first sensor by default (we are clueless.)
 	 * In both cases, the value can (and should) be changed by the user
 	 * prior to switching to a different mode.
 	 * Note that this is no longer needed for the IT8721F and later, as
@@ -3535,7 +3547,7 @@ static void it87_init_device(struct platform_device *pdev)
 	 * manual duty cycle.
 	 */
 	for (i = 0; i < NUM_AUTO_PWM; i++) {
-		data->pwm_temp_map[i] = i;
+		data->pwm_temp_map[i] = 0;
 		data->pwm_duty[i] = 0x7f;	/* Full speed */
 		data->auto_pwm[i][3] = 0x7f;	/* Full speed, hard-coded */
 	}
@@ -3688,6 +3700,7 @@ static int it87_probe(struct platform_device *pdev)
 	data->features = it87_devices[sio_data->type].features;
 	data->num_temp_limit = it87_devices[sio_data->type].num_temp_limit;
 	data->num_temp_offset = it87_devices[sio_data->type].num_temp_offset;
+	data->pwm_num_temp_map = it87_devices[sio_data->type].num_temp_map;
 	data->peci_mask = it87_devices[sio_data->type].peci_mask;
 	data->old_peci_mask = it87_devices[sio_data->type].old_peci_mask;
 	data->bank = 0xff;
