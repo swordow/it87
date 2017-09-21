@@ -756,6 +756,7 @@ struct it87_data {
 	s8 temp[NUM_TEMP][4];	/* [nr][0]=temp, [1]=min, [2]=max, [3]=offset */
 	u8 num_temp_limit;	/* Number of temperature limit registers */
 	u8 num_temp_offset;	/* Number of temperature offset registers */
+	u8 temp_src[4];		/* Up to 4 temperature source registers */
 	u8 sensor;		/* Register value (IT87_REG_TEMP_ENABLE) */
 	u8 extra;		/* Register value (IT87_REG_TEMP_EXTRA) */
 	u8 fan_div[NUM_FAN_DIV];/* Register encoding, shifted right */
@@ -1339,10 +1340,9 @@ static int get_temp_type(struct it87_data *data, int index)
 	int type = 0;
 
 	if (has_bank_sel(data)) {
-		int s1reg = IT87_REG_TEMP_SRC1[index/2] >> ((index % 2) * 4);
 		u8 src1, src2;
 
-		src1 = (it87_read_value(data, s1reg) >> ((index % 2) * 4)) & 0x0f;
+		src1 = (data->temp_src[index / 2] >> ((index % 2) * 4)) & 0x0f;
 
 		switch (data->type) {
 		case it8686:
@@ -1358,7 +1358,7 @@ static int get_temp_type(struct it87_data *data, int index)
 				index = src1;
 				break;
 			}
-			src2 = it87_read_value(data, IT87_REG_TEMP_SRC2);
+			src2 = data->temp_src[3];
 			switch(src1) {
 			case 3:
 				type = (src2 & BIT(index)) ? 6 : 5;
@@ -3465,6 +3465,14 @@ static void it87_check_tachometers_16bit_mode(struct platform_device *pdev)
 
 static void it87_start_monitoring(struct it87_data *data)
 {
+	if (has_bank_sel(data)) {
+		int i;
+		for (i = 0; i < 3; i++)
+			data->temp_src[i] =
+				it87_read_value(data, IT87_REG_TEMP_SRC1[i]);
+		data->temp_src[3] = it87_read_value(data, IT87_REG_TEMP_SRC2);
+	}
+
 	it87_write_value(data, IT87_REG_CONFIG,
 			 (it87_read_value(data, IT87_REG_CONFIG) & 0x3e)
 			 | (update_vbat ? 0x41 : 0x01));
