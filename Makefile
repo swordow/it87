@@ -96,7 +96,7 @@ dkms:
 	@cp `pwd`/compat.h $(DKMS_ROOT_PATH)
 	@cp `pwd`/it87.c $(DKMS_ROOT_PATH)
 	@dkms add -m $(DRIVER) -v $(DRIVER_VERSION)
-	@dkms build -m $(DRIVER) -v $(DRIVER_VERSION) --kernelsourcedir=/lib/modules/$(uname -r)/source
+	@dkms build -m $(DRIVER) -v $(DRIVER_VERSION) --kernelsourcedir=$(KERNEL_BUILD)
 	@dkms install --force -m $(DRIVER) -v $(DRIVER_VERSION)
 	@modprobe $(DRIVER)
 
