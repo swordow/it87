@@ -1,0 +1,10 @@
+Source: it87-dkms
+Section: misc
+Priority: optional
+Maintainer: Hannes Haberl <hannes.haberl@student.tugraz.at>
+Build-Depends: debhelper (>= 9), dkms
+
+Package: it87-dkms
+Architecture: linux-any
+Depends: ${misc:Depends}, dkms
+Description: it87
