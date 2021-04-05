@@ -1,0 +1,31 @@
+Usefull links:
+
+Coreboot figured out the Logical Device Numbers for 07h
+
+https://review.coreboot.org/c/coreboot/+/30957/7/src/superio/ite/it8528e/it8528e.h
+
+#define IT8528E_SP1  0x01 /* Com1 */
+#define IT8528E_SP2  0x02 /* Com2 */
+#define IT8528E_SWUC 0x04 /* System Wake-Up */
+#define IT8528E_KBCM 0x05 /* PS/2 mouse */
+#define IT8528E_KBCK 0x06 /* PS/2 keyboard */
+#define IT8528E_IR   0x0a /* Consumer IR */
+#define IT8528E_SMFI 0x0f /* Shared Memory/Flash Interface */
+#define IT8528E_RTCT 0x10 /* RTC-like Timer */
+#define IT8528E_PMC1 0x11 /* Power Management Channel 1 */
+#define IT8528E_PMC2 0x12 /* Power Management Channel 2 */
+#define IT8528E_SSPI 0x13 /* Serial Periphial Interface */
+#define IT8528E_PECI 0x14 /* Platform EC Interface */
+#define IT8528E_PMC3 0x17 /* Power Management Channel 3 */
+#define IT8528E_PMC4 0x18 /* Power Management Channel 4 */
+#define IT8528E_PMC5 0x19 /* Power Management Channel 5 */
+
+Specs:
+Couldn't find any spec for IT8528 in other ICs the devices are explaned on same device number. 
+IT8502 - http://eah.es/ITE_IT8502E_F_G_V0_7_7_09042008_1COM.pdf
+IT8511 - https://master-chip.ru/files/8b7f44da-9665-11e1-bc23-001d7218b93d/IT8511E.pdf
+IT8512 - https://www.recomb-omsk.ru/published/SC/html/scripts/doc/94689_datasheet_IT8512E_F_V0.4.1.pdf
+
+Git links:
+https://github.com/rvido/iManager
+https://github.com/guedou/TS-453Be/tree/master/doc
