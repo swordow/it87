@@ -1,4 +1,4 @@
-Usefull links:
+Useful links:
 
 Coreboot figured out the Logical Device Numbers for 07h
 
@@ -21,7 +21,7 @@ https://review.coreboot.org/c/coreboot/+/30957/7/src/superio/ite/it8528e/it8528e
 #define IT8528E_PMC5 0x19 /* Power Management Channel 5 */
 
 Specs:
-Couldn't find any spec for IT8528 in other ICs the devices are explaned on same device number. 
+Couldn't find any spec for IT8528 in other ICs the devices are explaned on same device number.
 IT8502 - http://eah.es/ITE_IT8502E_F_G_V0_7_7_09042008_1COM.pdf
 IT8511 - https://master-chip.ru/files/8b7f44da-9665-11e1-bc23-001d7218b93d/IT8511E.pdf
 IT8512 - https://www.recomb-omsk.ru/published/SC/html/scripts/doc/94689_datasheet_IT8512E_F_V0.4.1.pdf
