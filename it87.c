@@ -742,10 +742,7 @@ static const struct it87_devices it87_devices[] = {
 	[it8686] = {
 		.name = "it8686",
 		.model = "IT8686E",
-		.features = FEAT_NEWER_AUTOPWM | FEAT_12MV_ADC | FEAT_16BIT_FANS
-			| FEAT_SIX_FANS | FEAT_NEW_TEMPMAP
-			| FEAT_IN7_INTERNAL | FEAT_SIX_PWM | FEAT_PWM_FREQ2
-			| FEAT_SIX_TEMP | FEAT_BANK_SEL | FEAT_SCALING | FEAT_AVCC3,
+		.features = FEAT_NEWER_AUTOPWM | FEAT_12MV_ADC | FEAT_16BIT_FANS | FEAT_SIX_FANS | FEAT_NEW_TEMPMAP | FEAT_IN7_INTERNAL | FEAT_SIX_PWM | FEAT_PWM_FREQ2 | FEAT_SIX_TEMP | FEAT_BANK_SEL | FEAT_SCALING | FEAT_AVCC3,
 		.num_temp_limit = 6,
 		.num_temp_offset = 6,
 		.num_temp_map = 7,
@@ -2267,8 +2264,7 @@ static SENSOR_DEVICE_ATTR_2(pwm1_auto_point3_temp, 0644,
 		show_auto_temp, set_auto_temp, 0, 3);
 static SENSOR_DEVICE_ATTR_2(pwm1_auto_point4_temp, 0644,
 		show_auto_temp, set_auto_temp, 0, 4);
-static SENSOR_DEVICE_ATTR_2(pwm1_auto_start, 0644,
-		show_auto_pwm, set_auto_pwm, 0, 0);
+static SENSOR_DEVICE_ATTR_2(pwm1_auto_start, 0644, show_auto_pwm, set_auto_pwm, 0, 0);
 static SENSOR_DEVICE_ATTR(pwm1_auto_slope, 0644,
 		show_auto_pwm_slope, set_auto_pwm_slope, 0);
 
@@ -2296,8 +2292,7 @@ static SENSOR_DEVICE_ATTR_2(pwm2_auto_point3_temp, 0644,
 		show_auto_temp, set_auto_temp, 1, 3);
 static SENSOR_DEVICE_ATTR_2(pwm2_auto_point4_temp, 0644,
 		show_auto_temp, set_auto_temp, 1, 4);
-static SENSOR_DEVICE_ATTR_2(pwm2_auto_start, 0644,
-		show_auto_pwm, set_auto_pwm, 1, 0);
+static SENSOR_DEVICE_ATTR_2(pwm2_auto_start, 0644, show_auto_pwm, set_auto_pwm, 1, 0);
 static SENSOR_DEVICE_ATTR(pwm2_auto_slope, 0644,
 		show_auto_pwm_slope, set_auto_pwm_slope, 1);
 
@@ -2325,8 +2320,7 @@ static SENSOR_DEVICE_ATTR_2(pwm3_auto_point3_temp, 0644,
 		show_auto_temp, set_auto_temp, 2, 3);
 static SENSOR_DEVICE_ATTR_2(pwm3_auto_point4_temp, 0644,
 		show_auto_temp, set_auto_temp, 2, 4);
-static SENSOR_DEVICE_ATTR_2(pwm3_auto_start, 0644,
-		show_auto_pwm, set_auto_pwm, 2, 0);
+static SENSOR_DEVICE_ATTR_2(pwm3_auto_start, 0644, show_auto_pwm, set_auto_pwm, 2, 0);
 static SENSOR_DEVICE_ATTR(pwm3_auto_slope, 0644,
 		show_auto_pwm_slope, set_auto_pwm_slope, 2);
 
@@ -2344,8 +2338,7 @@ static SENSOR_DEVICE_ATTR_2(pwm4_auto_point2_temp, 0644,
 		show_auto_temp, set_auto_temp, 2, 2);
 static SENSOR_DEVICE_ATTR_2(pwm4_auto_point3_temp, 0644,
 		show_auto_temp, set_auto_temp, 2, 3);
-static SENSOR_DEVICE_ATTR_2(pwm4_auto_start, 0644,
-		show_auto_pwm, set_auto_pwm, 3, 0);
+static SENSOR_DEVICE_ATTR_2(pwm4_auto_start, 0644, show_auto_pwm, set_auto_pwm, 3, 0);
 static SENSOR_DEVICE_ATTR(pwm4_auto_slope, 0644,
 		show_auto_pwm_slope, set_auto_pwm_slope, 3);
 
@@ -2363,8 +2356,7 @@ static SENSOR_DEVICE_ATTR_2(pwm5_auto_point2_temp, 0644,
 		show_auto_temp, set_auto_temp, 2, 2);
 static SENSOR_DEVICE_ATTR_2(pwm5_auto_point3_temp, 0644,
 		show_auto_temp, set_auto_temp, 2, 3);
-static SENSOR_DEVICE_ATTR_2(pwm5_auto_start, 0644,
-		show_auto_pwm, set_auto_pwm, 4, 0);
+static SENSOR_DEVICE_ATTR_2(pwm5_auto_start, 0644, show_auto_pwm, set_auto_pwm, 4, 0);
 static SENSOR_DEVICE_ATTR(pwm5_auto_slope, 0644,
 		show_auto_pwm_slope, set_auto_pwm_slope, 4);
 
@@ -2382,8 +2374,7 @@ static SENSOR_DEVICE_ATTR_2(pwm6_auto_point2_temp, 0644,
 		show_auto_temp, set_auto_temp, 2, 2);
 static SENSOR_DEVICE_ATTR_2(pwm6_auto_point3_temp, 0644,
 		show_auto_temp, set_auto_temp, 2, 3);
-static SENSOR_DEVICE_ATTR_2(pwm6_auto_start, 0644,
-		show_auto_pwm, set_auto_pwm, 5, 0);
+static SENSOR_DEVICE_ATTR_2(pwm6_auto_start, 0644, show_auto_pwm, set_auto_pwm, 5, 0);
 static SENSOR_DEVICE_ATTR(pwm6_auto_slope, 0644,
 		show_auto_pwm_slope, set_auto_pwm_slope, 5);
 
@@ -3364,11 +3355,10 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 		sio_data->skip_in |= BIT(3);  /* No VIN3 */
 		sio_data->skip_in |= BIT(6);  /* No VIN6 */
 
-		sio_data->beep_pin = superio_inb(sioaddr,
-				IT87_SIO_BEEP_PIN_REG) & 0x3f;
-	} else if (sio_data->type == it8620 ||
-			sio_data->type == it8628 || sio_data->type == it8528 ||
-			sio_data->type == it8686 || sio_data->type == it8688) {
+		sio_data->beep_pin = superio_inb(sioaddr, IT87_SIO_BEEP_PIN_REG) & 0x3f;
+
+	}
+	else if (sio_data->type == it8620 || sio_data->type == it8628 || sio_data->type == it8528 || sio_data->type == it8686 || sio_data->type == it8688) {
 		int reg;
 
 		superio_select(sioaddr, GPIO);
