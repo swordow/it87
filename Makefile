@@ -1,30 +1,30 @@
 # For building for the current running version of Linux
 ifndef TARGET
-TARGET		:= $(shell uname -r)
+TARGET = $(shell uname -r)
 endif
 # Or specific version
-#TARGET		:= 2.6.33.5
+#TARGET = 2.6.33.5
 
-KERNEL_MODULES	:= /lib/modules/$(TARGET)
+KERNEL_MODULES = /lib/modules/$(TARGET)
 
 ifneq ("","$(wildcard /usr/src/linux-headers-$(TARGET)/*)")
 # Ubuntu
-KERNEL_BUILD	:= /usr/src/linux-headers-$(TARGET)
+KERNEL_BUILD = /usr/src/linux-headers-$(TARGET)
 else
 ifneq ("","$(wildcard /usr/src/kernels/$(TARGET)/*)")
 # Fedora
-KERNEL_BUILD	:= /usr/src/kernels/$(TARGET)
+KERNEL_BUILD = /usr/src/kernels/$(TARGET)
 else
-KERNEL_BUILD	:= $(KERNEL_MODULES)/build
+KERNEL_BUILD = $(KERNEL_MODULES)/build
 endif
 endif
 
-#SYSTEM_MAP	:= $(KERNEL_BUILD)/System.map
+# SYSTEM_MAP = $(KERNEL_BUILD)/System.map
 ifneq ("","$(wildcard /boot/System.map-$(TARGET))")
-SYSTEM_MAP	:= /boot/System.map-$(TARGET)
+SYSTEM_MAP = /boot/System.map-$(TARGET)
 else
 # Arch
-SYSTEM_MAP	:= /proc/kallsyms
+SYSTEM_MAP = /proc/kallsyms
 endif
 
 DRIVER := it87
@@ -47,7 +47,7 @@ MODPROBE_OUTPUT=$(shell lsmod | grep it87)
 MOD_SUBDIR = drivers/hwmon
 MODDESTDIR=$(KERNEL_MODULES)/kernel/$(MOD_SUBDIR)
 
-obj-m	:= $(patsubst %,%.o,$(DRIVER))
+obj-m = $(patsubst %,%.o,$(DRIVER))
 obj-ko  := $(patsubst %,%.ko,$(DRIVER))
 
 MAKEFLAGS += --no-print-directory
@@ -59,9 +59,11 @@ ifneq ("","$(wildcard $(MODDESTDIR)/*.ko.xz)")
 COMPRESS_XZ := y
 endif
 
+
 .PHONY: all install modules modules_install clean dkms dkms_clean
 
 all: modules
+
 
 # Targets for running make directly in the external module directory:
 
