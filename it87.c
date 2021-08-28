@@ -4272,6 +4272,30 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 	},
 	{
 		.matches = {
+			DMI_MATCH(DMI_SYS_VENDOR,
+					"Gigabyte Technology Co., Ltd."),
+			DMI_MATCH(DMI_BOARD_NAME, "Z390 AORUS ULTRA-CF"),
+		},
+		.driver_data = &gigabyte_sio2_force,
+	},
+	{
+		.matches = {
+			DMI_MATCH(DMI_SYS_VENDOR,
+					"Gigabyte Technology Co., Ltd."),
+			DMI_MATCH(DMI_BOARD_NAME, "X570 AORUS MASTER"),
+		},
+		.driver_data = &gigabyte_sio2_force,
+	},
+	{
+		.matches = {
+			DMI_MATCH(DMI_SYS_VENDOR,
+					"Gigabyte Technology Co., Ltd."),
+			DMI_MATCH(DMI_BOARD_NAME, "B550 AORUS PRO AC"),
+		},
+		.driver_data = &gigabyte_sio2_force,
+	},
+	{
+		.matches = {
 			DMI_MATCH(DMI_BOARD_VENDOR, "nVIDIA"),
 			DMI_MATCH(DMI_BOARD_NAME, "FN68PT"),
 		},
