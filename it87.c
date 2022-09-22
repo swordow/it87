@@ -879,7 +879,7 @@ struct it87_data {
 
 	unsigned short addr;
 	struct mutex update_lock;
-	char valid;    /* !=0 if following fields are valid */
+	bool valid;    /* true if following fields are valid */
 	unsigned long last_updated;  /* In jiffies */
 
 	u16 in_scaled;    /* Internal voltage sensors are scaled */
@@ -1336,7 +1336,7 @@ static struct it87_data *it87_update_device(struct device *dev)
 			data->vid &= 0x3f;
 		}
 		data->last_updated = jiffies;
-		data->valid = 1;
+		data->valid = true;
 		smbus_enable(data);
 	}
 unlock:
@@ -1468,7 +1468,7 @@ static ssize_t set_temp(struct device *dev, struct device_attribute *attr,
 				regval |= 0x80;
 				data->write(data, IT87_REG_BEEP_ENABLE, regval);
 			}
-			data->valid = 0;
+			data->valid = false;
 			reg = data->REG_TEMP_OFFSET[nr];
 			break;
 	}
@@ -1663,7 +1663,7 @@ static ssize_t set_temp_type(struct device *dev, struct device_attribute *attr,
 	data->write(data, IT87_REG_TEMP_ENABLE, data->sensor);
 	if (has_temp_old_peci(data, nr))
 		data->write(data, IT87_REG_TEMP_EXTRA, data->extra);
-	data->valid = 0;  /* Force cache refresh */
+	data->valid = false;  /* Force cache refresh */
 unlock:
 	it87_unlock(data);
 	return count;
@@ -2450,7 +2450,7 @@ static ssize_t clear_intrusion(struct device *dev,
 	config |= BIT(5);
 	data->write(data, IT87_REG_CONFIG, config);
 	/* Invalidate cache to force re-read */
-	data->valid = 0;
+	data->valid = false;
 	it87_unlock(data);
 	return count;
 }
