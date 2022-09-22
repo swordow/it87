@@ -826,6 +826,7 @@ struct it87_sio_data {
 	u8 vid_value;
 	u8 beep_pin;
 	u8 internal;  /* Internal sensors can be labeled */
+	bool need_in7_reroute;
 	/* Features skipped based on config or DMI */
 	u16 skip_in;
 	u8 skip_vid;
@@ -877,6 +878,7 @@ struct it87_data {
 	u16 in_internal;  /* Bitfield, internal sensors (for labels) */
 	u16 has_in;    /* Bitfield, voltage sensors enabled */
 	u8 in[NUM_VIN][3];    /* [nr][0]=in, [1]=min, [2]=max */
+	bool need_in7_reroute;
 	u8 has_fan;    /* Bitfield, fans enabled */
 	u16 fan[NUM_FAN][2];  /* Register values, [nr][0]=fan, [1]=min */
 	u8 has_temp;    /* Bitfield, temp sensors enabled */
@@ -3192,6 +3194,7 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 	sio_data->doexit = doexit;
 
 	err = 0;
+	sio_data->sioaddr = sioaddr;
 	sio_data->revision = superio_inb(sioaddr, DEVREV) & 0x0f;
 
 	config = &it87_devices[sio_data->type];
@@ -3298,6 +3301,7 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 				reg2c |= BIT(1);
 				superio_outb(sioaddr, IT87_SIO_PINX2_REG,
 						reg2c);
+				sio_data->need_in7_reroute = true;
 				pr_notice("Routing internal VCCH5V to in7.\n");
 			}
 			pr_notice("in7 routed to internal voltage divider, with external pin disabled.\n");
@@ -3670,6 +3674,7 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 		if ((sio_data->type == it8720 || uart6) && !(reg & BIT(1))) {
 			reg |= BIT(1);
 			superio_outb(sioaddr, IT87_SIO_PINX2_REG, reg);
+			sio_data->need_in7_reroute = true;
 			pr_notice("Routing internal VCCH5V to in7\n");
 		}
 		if (reg & BIT(0))
@@ -4018,8 +4023,6 @@ static int it87_check_pwm(struct device *dev)
 					"PWM configuration is too broken to be fixed\n");
 		}
 
-		dev_info(dev,
-				"Detected broken BIOS defaults, disabling PWM interface\n");
 		return 0;
 	} else if (fix_pwm_polarity) {
 		dev_info(dev,
@@ -4058,6 +4061,7 @@ static int it87_probe(struct platform_device *pdev)
 	}
 
 	data->addr = res->start;
+	data->sioaddr = sio_data->sioaddr;
 	data->type = sio_data->type;
 	data->sioaddr = sio_data->sioaddr;
 	data->smbus_bitmap = sio_data->smbus_bitmap;
@@ -4124,6 +4128,9 @@ static int it87_probe(struct platform_device *pdev)
 
 	/* Check PWM configuration */
 	enable_pwm_interface = it87_check_pwm(dev);
+	if (!enable_pwm_interface)
+		dev_info(dev,
+			"Detected broken BIOS defaults, disabling PWM interface\n");
 
 	/* Starting with IT8721F, we handle scaling of internal voltages */
 	if (has_scaling(data)) {
@@ -4151,6 +4158,7 @@ static int it87_probe(struct platform_device *pdev)
 	}
 
 	data->in_internal = sio_data->internal;
+	data->need_in7_reroute = sio_data->need_in7_reroute;
 	data->has_in = 0x3ff & ~sio_data->skip_in;
 
 	if (has_four_temp(data)) {
@@ -4214,9 +4222,71 @@ static int it87_probe(struct platform_device *pdev)
 	return PTR_ERR_OR_ZERO(hwmon_dev);
 }
 
+static void __maybe_unused it87_resume_sio(struct platform_device *pdev)
+{
+        struct it87_data *data = dev_get_drvdata(&pdev->dev);
+        int err;
+        int reg2c;
+
+        if (!data->need_in7_reroute)
+                return;
+
+        err = superio_enter(data->sioaddr);
+        if (err) {
+                dev_warn(&pdev->dev,
+                         "Unable to enter Super I/O to reroute in7 (%d)",
+                         err);
+                return;
+        }
+
+        superio_select(data->sioaddr, GPIO);
+
+        reg2c = superio_inb(data->sioaddr, IT87_SIO_PINX2_REG);
+        if (!(reg2c & BIT(1))) {
+                dev_dbg(&pdev->dev,
+                        "Routing internal VCCH5V to in7 again");
+
+                reg2c |= BIT(1);
+                superio_outb(data->sioaddr, IT87_SIO_PINX2_REG,
+                             reg2c);
+        }
+
+        superio_exit(data->sioaddr, data->doexit);
+}
+
+static int __maybe_unused it87_resume(struct device *dev)
+{
+        struct platform_device *pdev = to_platform_device(dev);
+        struct it87_data *data = dev_get_drvdata(dev);
+
+        it87_resume_sio(pdev);
+
+        mutex_lock(&data->update_lock);
+
+        it87_check_pwm(dev);
+        it87_check_limit_regs(data);
+        it87_check_voltage_monitors_reset(data);
+        it87_check_tachometers_reset(pdev);
+        it87_check_tachometers_16bit_mode(pdev);
+
+        it87_start_monitoring(data);
+
+        /* force update */
+        data->valid = false;
+
+        mutex_unlock(&data->update_lock);
+
+        it87_update_device(dev);
+
+        return 0;
+}
+
+static SIMPLE_DEV_PM_OPS(it87_dev_pm_ops, NULL, it87_resume);
+
 static struct platform_driver it87_driver = {
 	.driver = {
 		.name  = DRVNAME,
+		.pm    = &it87_dev_pm_ops,
 	},
 	.probe  = it87_probe,
 };
