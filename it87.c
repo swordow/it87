@@ -3203,7 +3203,6 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 	sio_data->doexit = doexit;
 
 	err = 0;
-	sio_data->sioaddr = sioaddr;
 	sio_data->revision = superio_inb(sioaddr, DEVREV) & 0x0f;
 
 	config = &it87_devices[sio_data->type];
@@ -4075,7 +4074,6 @@ static int it87_probe(struct platform_device *pdev)
 	}
 
 	data->addr = res->start;
-	data->sioaddr = sio_data->sioaddr;
 	data->type = sio_data->type;
 	data->sioaddr = sio_data->sioaddr;
 	data->smbus_bitmap = sio_data->smbus_bitmap;
