@@ -4261,7 +4261,7 @@ static int __maybe_unused it87_resume(struct device *dev)
 
         it87_resume_sio(pdev);
 
-        mutex_lock(&data->update_lock);
+	it87_lock(data);
 
         it87_check_pwm(dev);
         it87_check_limit_regs(data);
@@ -4274,7 +4274,7 @@ static int __maybe_unused it87_resume(struct device *dev)
         /* force update */
         data->valid = false;
 
-        mutex_unlock(&data->update_lock);
+	it87_unlock(data);
 
         it87_update_device(dev);
 
