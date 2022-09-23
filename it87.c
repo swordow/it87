@@ -309,10 +309,10 @@ static const u8 IT87_REG_PWM_DUTY[]    = { 0x63, 0x6b, 0x73, 0x7b, 0xa3, 0xab };
 static const u8 IT87_REG_VIN[]	= { 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26,
 				    0x27, 0x28, 0x2f, 0x2c, 0x2d, 0x2e };
 
-#define IT87_REG_TEMP(nr)     (0x29 + (nr))
+#define IT87_REG_TEMP(nr)      (0x29 + (nr))
 
-#define IT87_REG_VIN_MAX(nr)  (0x30 + (nr) * 2)
-#define IT87_REG_VIN_MIN(nr)  (0x31 + (nr) * 2)
+#define IT87_REG_VIN_MAX(nr)   (0x30 + (nr) * 2)
+#define IT87_REG_VIN_MIN(nr)   (0x31 + (nr) * 2)
 
 static const u8 IT87_REG_TEMP_HIGH[]   = { 0x40, 0x42, 0x44, 0x46, 0xb4, 0xb6 };
 static const u8 IT87_REG_TEMP_LOW[]    = { 0x41, 0x43, 0x45, 0x47, 0xb5, 0xb7 };
@@ -792,7 +792,7 @@ static const struct it87_devices it87_devices[] = {
 				 ((data)->peci_mask & BIT(nr)))
 #define has_temp_old_peci(data, nr) \
 				(((data)->features & FEAT_TEMP_OLD_PECI) && \
-	 			 ((data)->old_peci_mask & BIT(nr)))
+				 ((data)->old_peci_mask & BIT(nr)))
 #define has_fan16_config(data)	((data)->features & FEAT_FAN16_CONFIG)
 #define has_five_fans(data)	((data)->features & (FEAT_FIVE_FANS | \
 						     FEAT_SIX_FANS))
@@ -3254,7 +3254,7 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 		/* The IT8705F has a different LD number for GPIO */
 		superio_select(sioaddr, 5);
 		sio_data->beep_pin = superio_inb(sioaddr,
-				IT87_SIO_BEEP_PIN_REG) & 0x3f;
+						 IT87_SIO_BEEP_PIN_REG) & 0x3f;
 	} else if (sio_data->type == it8783) {
 		int reg25, reg27, reg2a, reg2c, regef;
 
@@ -3270,7 +3270,7 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 		if ((reg27 & BIT(0)) || !(reg2c & BIT(2)))
 			sio_data->skip_fan |= BIT(2);
 		if ((reg25 & BIT(4)) ||
-				(!(reg2a & BIT(1)) && (regef & BIT(0))))
+		    (!(reg2a & BIT(1)) && (regef & BIT(0))))
 			sio_data->skip_pwm |= BIT(2);
 
 		/* Check if fan2 is there or not */
@@ -3308,7 +3308,7 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 			if (!(reg2c & BIT(1))) {
 				reg2c |= BIT(1);
 				superio_outb(sioaddr, IT87_SIO_PINX2_REG,
-						reg2c);
+					     reg2c);
 				sio_data->need_in7_reroute = true;
 				pr_notice("Routing internal VCCH5V to in7.\n");
 			}
@@ -3322,9 +3322,9 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 			sio_data->internal |= BIT(1);
 
 		sio_data->beep_pin = superio_inb(sioaddr,
-				IT87_SIO_BEEP_PIN_REG) & 0x3f;
+						 IT87_SIO_BEEP_PIN_REG) & 0x3f;
 	} else if (sio_data->type == it8603 || sio_data->type == it8606 ||
-			sio_data->type == it8607) {
+		   sio_data->type == it8607) {
 		int reg27, reg29;
 
 		superio_select(sioaddr, GPIO);
@@ -4297,10 +4297,10 @@ static SIMPLE_DEV_PM_OPS(it87_dev_pm_ops, NULL, it87_resume);
 
 static struct platform_driver it87_driver = {
 	.driver = {
-		.name  = DRVNAME,
-		.pm    = &it87_dev_pm_ops,
+		.name	= DRVNAME,
+		.pm	= &it87_dev_pm_ops,
 	},
-	.probe  = it87_probe,
+	.probe	= it87_probe,
 };
 
 static int __init it87_device_add(int index, unsigned short sio_address,
@@ -4309,7 +4309,7 @@ static int __init it87_device_add(int index, unsigned short sio_address,
 {
 	struct platform_device *pdev;
 	struct resource res = {
-		.name  = DRVNAME,
+		.name	= DRVNAME,
 	};
 	int err;
 
@@ -4553,7 +4553,7 @@ module_param(update_vbat, bool, 0000);
 MODULE_PARM_DESC(update_vbat, "Update vbat if set else return powerup value");
 module_param(fix_pwm_polarity, bool, 0000);
 MODULE_PARM_DESC(fix_pwm_polarity,
-		"Force PWM polarity to active high (DANGEROUS)");
+		 "Force PWM polarity to active high (DANGEROUS)");
 MODULE_LICENSE("GPL");
 MODULE_VERSION(IT87_DRIVER_VERSION);
 
