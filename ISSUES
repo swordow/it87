@@ -15,6 +15,8 @@ is loaded or not. Analysis shows that some chip registers have a wrong value
 after resume. The working assumption is that there is a BIOS problem.
 There is no known workaround.
 
+NOTE: This may have been fixed by a later patch, but needs to be confirmed.
+
 On-board temperature display shows '00' on GA-AX370 Gaming 5
 ============================================================
 
@@ -22,3 +24,6 @@ On-board temperature display shows '00' on GA-AX370 Gaming 5
 Gigabyte AX370 Gaming 5 shows '00' instead of the current temperature after
 "modprobe it87". No further information is available at this time.
 There is no known workaround.
+
+NOTE: This also needs to be confirmed as there have been a number of
+patches to temperature measurement.
