@@ -3095,6 +3095,7 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 
 	err = -ENODEV;
 	chip_type = superio_inw(sioaddr, DEVID);
+	/* check first for a valid chip before forcing chip id */
 	if (chip_type == 0xffff)
 		goto exit;
 
