@@ -8,7 +8,7 @@ else
 fi
 
 DRV_NAME="$(basename $(pwd))"
-DRV_VERSION=$(git describe --long HEAD^).$(date -d "$(git show -s --format=%ci HEAD^)" +%Y%m%d)
+DRV_VERSION=$(dkms status ${DRV_NAME} -k $(uname -r) | cut -d, -f1 | cut -d/ -f2)
 
 dkms remove ${DRV_NAME}/${DRV_VERSION} --all
 rm -rf /usr/src/${DRV_NAME}-${DRV_VERSION}
