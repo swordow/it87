@@ -833,6 +833,7 @@ struct it87_sio_data {
 	u8 skip_fan;
 	u8 skip_pwm;
 	u8 skip_temp;
+	bool skip_acpi_res;
 	u8 smbus_bitmap;
 	u8 ec_special_config;
 };
@@ -4356,7 +4357,7 @@ static int __init it87_device_add(int index, unsigned short sio_address,
 
 	err = acpi_check_resource_conflict(&res);
 	if (err) {
-		if (!ignore_resource_conflict)
+		if (!sio_data->skip_acpi_res && !ignore_resource_conflict)
 			return err;
 	}
 
@@ -4394,6 +4395,7 @@ exit_device_put:
 struct it87_dmi_data {
 	bool sio2_force_config;	/* force sio2 into configuration mode  */
 	u8 skip_pwm;		/* pwm channels to skip for this board  */
+	bool skip_acpi_res;	/* ignore acpi failures on this board */
 };
 
 /*
@@ -4424,6 +4426,29 @@ static struct it87_dmi_data gigabyte_sio2_force = {
  */
 static struct it87_dmi_data nvidia_fn68pt = {
 	.skip_pwm = BIT(1),
+};
+
+/*
+ * On some Gigabyte boards sensors are marked as ACPI regions but not
+ * really handled by ACPI calls, as they return no data.
+ * Most commonly this is seen on boards with multiple ITE chips.
+ * In this case we just ignore the failure and continue on.
+ * This is effectively the same as the use of either
+ * acpi_enforce_resources=lax (kernel)
+ * or
+ * ignore_resource_conflict=1 (it87)
+ * but set programatically.
+ */
+static struct it87_dmi_data gigabyte_acpi_ignore = {
+	.skip_acpi_res = true,
+};
+
+/*
+ * Handle setting multiple fields - see the definitions above.
+ */
+static struct it87_dmi_data gigabyte_sio2_and_acpi = {
+	.sio2_force_config = true,
+	.skip_acpi_res = true,
 };
 
 static const struct dmi_system_id it87_dmi_table[] __initconst = {
@@ -4457,7 +4482,23 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 				  "Gigabyte Technology Co., Ltd."),
 			DMI_MATCH(DMI_BOARD_NAME, "Z390 AORUS ULTRA-CF"),
 		},
-		.driver_data = &gigabyte_sio2_force,
+		.driver_data = &gigabyte_sio2_and_acpi,
+	},
+	{
+		.matches = {
+			DMI_MATCH(DMI_SYS_VENDOR,
+				  "Gigabyte Technology Co., Ltd."),
+			DMI_MATCH(DMI_BOARD_NAME, "Z490 AORUS ELITE AC"),
+		},
+		.driver_data = &gigabyte_acpi_ignore,
+	},
+	{
+		.matches = {
+			DMI_MATCH(DMI_SYS_VENDOR,
+				  "Gigabyte Technology Co., Ltd."),
+			DMI_MATCH(DMI_BOARD_NAME, "Z570 AORUS ELITE WIFI"),
+		},
+		.driver_data = &gigabyte_acpi_ignore,
 	},
 	{
 		.matches = {
@@ -4465,7 +4506,7 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 				  "Gigabyte Technology Co., Ltd."),
 			DMI_MATCH(DMI_BOARD_NAME, "X570 AORUS MASTER"),
 		},
-		.driver_data = &gigabyte_sio2_force,
+		.driver_data = &gigabyte_sio2_and_acpi,
 	},
 	{
 		.matches = {
@@ -4473,7 +4514,7 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 				  "Gigabyte Technology Co., Ltd."),
 			DMI_MATCH(DMI_BOARD_NAME, "X570 AORUS PRO WIFI"),
 		},
-		.driver_data = &gigabyte_sio2_force,
+		.driver_data = &gigabyte_sio2_and_acpi,
 	},
 	{
 		.matches = {
@@ -4481,7 +4522,7 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 				  "Gigabyte Technology Co., Ltd."),
 			DMI_MATCH(DMI_BOARD_NAME, "B550 AORUS PRO AC"),
 		},
-		.driver_data = &gigabyte_sio2_force,
+		.driver_data = &gigabyte_sio2_and_acpi,
 	},
 	{
 		.matches = {
@@ -4489,7 +4530,7 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 				  "Gigabyte Technology Co., Ltd."),
 			DMI_MATCH(DMI_BOARD_NAME, "Z690 AORUS PRO DDR4"),
 		},
-		.driver_data = &gigabyte_sio2_force,
+		.driver_data = &gigabyte_sio2_and_acpi,
 	},
 	{
 		.matches = {
@@ -4539,8 +4580,10 @@ static int __init sm_it87_init(void)
 		if (i && isa_address[i] == isa_address[0])
 			break;
 
-		if (dmi_data)
+		if (dmi_data) {
 			sio_data.skip_pwm |= dmi_data->skip_pwm;
+			sio_data.skip_acpi_res |= dmi_data->skip_acpi_res;
+		}
 		err = it87_device_add(i, isa_address[i], mmio_address,
 				      &sio_data);
 		if (err)
