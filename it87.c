@@ -4496,7 +4496,7 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 		.matches = {
 			DMI_MATCH(DMI_SYS_VENDOR,
 				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "Z570 AORUS ELITE WIFI"),
+			DMI_MATCH(DMI_BOARD_NAME, "X570 AORUS ELITE WIFI"),
 		},
 		.driver_data = &gigabyte_acpi_ignore,
 	},
