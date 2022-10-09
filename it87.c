@@ -261,15 +261,15 @@ static bool fix_pwm_polarity;
 #define IT87_REG_VID           0x0a
 
 /* Interface Selection register on other chips */
-#define IT87_REG_IFSEL          0x0a
+#define IT87_REG_IFSEL         0x0a
 
 /*
  * The IT8705F and IT8712F earlier than revision 0x08 use register 0x0b
  * for fan divisors. Later IT8712F revisions must use 16-bit tachometer
  * mode.
  */
-#define IT87_REG_FAN_DIV        0x0b
-#define IT87_REG_FAN_16BIT      0x0c
+#define IT87_REG_FAN_DIV       0x0b
+#define IT87_REG_FAN_16BIT     0x0c
 
 /*
  * Monitors:
@@ -4458,6 +4458,7 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 				  "Gigabyte Technology Co., Ltd."),
 			DMI_MATCH(DMI_BOARD_NAME, "AB350"),
 		},
+		/* ? + IT8792E/IT8795E */
 		.driver_data = &gigabyte_sio2_force,
 	},
 	{
@@ -4466,6 +4467,7 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 				  "Gigabyte Technology Co., Ltd."),
 			DMI_MATCH(DMI_BOARD_NAME, "AX370"),
 		},
+		/* ? + IT8792E/IT8795E */
 		.driver_data = &gigabyte_sio2_force,
 	},
 	{
@@ -4474,7 +4476,17 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 				  "Gigabyte Technology Co., Ltd."),
 			DMI_MATCH(DMI_BOARD_NAME, "Z97X-Gaming G1"),
 		},
+		/* ? + IT8790E */
 		.driver_data = &gigabyte_sio2_force,
+	},
+	{
+		.matches = {
+			DMI_MATCH(DMI_SYS_VENDOR,
+				  "Gigabyte Technology Co., Ltd."),
+			DMI_MATCH(DMI_BOARD_NAME, "TRX40 AORUS XTREME"),
+		},
+		/* IT8688E + IT8792E/IT8795E */
+		.driver_data = &gigabyte_sio2_and_acpi,
 	},
 	{
 		.matches = {
@@ -4482,6 +4494,7 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 				  "Gigabyte Technology Co., Ltd."),
 			DMI_MATCH(DMI_BOARD_NAME, "Z390 AORUS ULTRA-CF"),
 		},
+		/* IT8688E + IT8792E/IT8795E */
 		.driver_data = &gigabyte_sio2_and_acpi,
 	},
 	{
@@ -4490,14 +4503,33 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 				  "Gigabyte Technology Co., Ltd."),
 			DMI_MATCH(DMI_BOARD_NAME, "Z490 AORUS ELITE AC"),
 		},
+		/* IT8688E */
 		.driver_data = &gigabyte_acpi_ignore,
 	},
 	{
 		.matches = {
 			DMI_MATCH(DMI_SYS_VENDOR,
 				  "Gigabyte Technology Co., Ltd."),
+			DMI_MATCH(DMI_BOARD_NAME, "B550 AORUS PRO AC"),
+		},
+		/* IT8688E + IT8792E/IT8795E */
+		.driver_data = &gigabyte_sio2_and_acpi,
+	},
+	{
+		.matches = {
+			DMI_MATCH(DMI_SYS_VENDOR,
+				  "Gigabyte Technology Co., Ltd."),
+			DMI_MATCH(DMI_BOARD_NAME, "B560I AORUS PRO AX"),
+		},
+		/* IT8689E */
+		.driver_data = &gigabyte_acpi_ignore,
+	{
+		.matches = {
+			DMI_MATCH(DMI_SYS_VENDOR,
+				  "Gigabyte Technology Co., Ltd."),
 			DMI_MATCH(DMI_BOARD_NAME, "X570 AORUS ELITE WIFI"),
 		},
+		/* IT8688E */
 		.driver_data = &gigabyte_acpi_ignore,
 	},
 	{
@@ -4506,6 +4538,7 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 				  "Gigabyte Technology Co., Ltd."),
 			DMI_MATCH(DMI_BOARD_NAME, "X570 AORUS MASTER"),
 		},
+		/* IT8688E + IT8792E/IT8795E */
 		.driver_data = &gigabyte_sio2_and_acpi,
 	},
 	{
@@ -4514,14 +4547,7 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 				  "Gigabyte Technology Co., Ltd."),
 			DMI_MATCH(DMI_BOARD_NAME, "X570 AORUS PRO WIFI"),
 		},
-		.driver_data = &gigabyte_sio2_and_acpi,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "B550 AORUS PRO AC"),
-		},
+		/* IT8688E + IT8792E/IT8795E */
 		.driver_data = &gigabyte_sio2_and_acpi,
 	},
 	{
@@ -4530,6 +4556,7 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 				  "Gigabyte Technology Co., Ltd."),
 			DMI_MATCH(DMI_BOARD_NAME, "Z690 AORUS PRO DDR4"),
 		},
+		/* IT8689E + IT8695E */
 		.driver_data = &gigabyte_sio2_and_acpi,
 	},
 	{
