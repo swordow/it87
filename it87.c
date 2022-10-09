@@ -26,7 +26,6 @@
  *            IT8686E  Super I/O chip w/LPC interface
  *            IT8688E  Super I/O chip w/LPC interface
  *            IT8689E  Super I/O chip w/LPC interface
- *            IT8695E  Super I/O chip w/LPC interface
  *            IT8705F  Super I/O chip w/LPC interface
  *            IT8712F  Super I/O chip w/LPC interface
  *            IT8716F  Super I/O chip w/LPC interface
@@ -47,6 +46,7 @@
  *            IT8786E  Super I/O chip w/LPC interface
  *            IT8790E  Super I/O chip w/LPC interface
  *            IT8792E  Super I/O chip w/LPC interface
+ *            IT87952E  Super I/O chip w/LPC interface
  *            Sis950   A clone of the IT8705F
  *
  *  Copyright (C) 2001 Chris Gauthron
@@ -83,7 +83,7 @@ enum chips { it87, it8712, it8716, it8718, it8720, it8721, it8728, it8732,
 	     it8736, it8738,
 	     it8771, it8772, it8781, it8782, it8783, it8786, it8790,
 	     it8792, it8603, it8606, it8607, it8613, it8620, it8622, it8625,
-	     it8628, it8528, it8655, it8665, it8686, it8688, it8689, it8695 };
+	     it8628, it8528, it8655, it8665, it8686, it8688, it8689, it87952 };
 
 static struct platform_device *it87_pdev[2];
 
@@ -190,7 +190,7 @@ static inline void superio_exit(int ioreg, bool doexit)
 #define IT8686E_DEVID 0x8686
 #define IT8688E_DEVID 0x8688
 #define IT8689E_DEVID 0x8689
-#define IT8695E_DEVID 0x8695
+#define IT87952E_DEVID 0x8695
 
 /* Logical device 4 (Environmental Monitor) registers */
 #define IT87_ACT_REG  0x30
@@ -767,9 +767,9 @@ static const struct it87_devices it87_devices[] = {
 		.num_temp_map = 7,
 		.smbus_bitmap = BIT(1) | BIT(2),
 	},
-	[it8695] = {
-		.name = "it8695",
-		.model = "IT8695E",
+	[it87952] = {
+		.name = "it87952",
+		.model = "IT87952E",
 		.features = FEAT_NEWER_AUTOPWM | FEAT_10_9MV_ADC | FEAT_SCALING
 		  | FEAT_16BIT_FANS | FEAT_TEMP_PECI
 		  | FEAT_IN7_INTERNAL | FEAT_PWM_FREQ2 | FEAT_FANCTL_ONOFF,
@@ -3210,9 +3210,9 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 	case IT8689E_DEVID:
 		sio_data->type = it8689;
 		break;
-	case IT8695E_DEVID:
-		sio_data->type = it8695;
-		doexit = false;
+	case IT87952E_DEVID:
+		sio_data->type = it87952;
+		doexit = false;    /* See IT8792E comment above */
 		break;
 	case 0xffff:  /* No device at all */
 		goto exit;
@@ -4557,7 +4557,7 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 				  "Gigabyte Technology Co., Ltd."),
 			DMI_MATCH(DMI_BOARD_NAME, "Z690 AORUS PRO DDR4"),
 		},
-		/* IT8689E + IT8695E */
+		/* IT8689E + IT87952E */
 		.driver_data = &gigabyte_sio2_and_acpi,
 	},
 	{
