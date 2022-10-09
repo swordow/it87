@@ -4523,6 +4523,7 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 		},
 		/* IT8689E */
 		.driver_data = &gigabyte_acpi_ignore,
+	},
 	{
 		.matches = {
 			DMI_MATCH(DMI_SYS_VENDOR,
