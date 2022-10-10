@@ -4596,6 +4596,7 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 	},
 	{ }
 };
+MODULE_DEVICE_TABLE(dmi, it87_dmi_table);
 
 static int __init sm_it87_init(void)
 {
