@@ -4555,6 +4555,15 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 		.matches = {
 			DMI_MATCH(DMI_SYS_VENDOR,
 				  "Gigabyte Technology Co., Ltd."),
+			DMI_MATCH(DMI_BOARD_NAME, "X570 I AORUS PRO WIFI"),
+		},
+		/* IT8688E */
+		.driver_data = &gigabyte_acpi_ignore,
+	},
+	{
+		.matches = {
+			DMI_MATCH(DMI_SYS_VENDOR,
+				  "Gigabyte Technology Co., Ltd."),
 			DMI_MATCH(DMI_BOARD_NAME, "X570S AERO G"),
 		},
 		/* IT8689E + IT87952E */
