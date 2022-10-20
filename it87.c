@@ -193,7 +193,7 @@ static inline void superio_exit(int ioreg, bool doexit)
 #define IT8688E_DEVID 0x8688
 #define IT8689E_DEVID 0x8689
 #define IT87952E_DEVID 0x8695
-#define IT87922E_DEVID 0x8833
+#define IT87922E_DEVID 0x8883
 
 /* Logical device 4 (Environmental Monitor) registers */
 #define IT87_ACT_REG  0x30
