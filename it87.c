@@ -3241,7 +3241,7 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 
 	superio_select(sioaddr, PME);
 	if (!(superio_inb(sioaddr, IT87_ACT_REG) & 0x01)) {
-		pr_info("Device not activated, skipping\n");
+		pr_info("Device (DEVID=0x%x) not activated, skipping\n", chip_type);
 		goto exit;
 	}
 
