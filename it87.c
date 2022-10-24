@@ -3223,13 +3223,15 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 
 	superio_select(sioaddr, PME);
 	if (!(superio_inb(sioaddr, IT87_ACT_REG) & 0x01)) {
-		pr_info("Device not activated, skipping\n");
+		pr_info("Device (DEVID=0x%x) not activated, skipping\n",
+			chip_type);
 		goto exit;
 	}
 
 	*address = superio_inw(sioaddr, IT87_BASE_REG) & ~(IT87_EXTENT - 1);
 	if (*address == 0) {
-		pr_info("Base address not set, skipping\n");
+		pr_info("Base address not set (DEVID=0x%x), skipping\n",
+			chip_type);
 		goto exit;
 	}
 
@@ -4568,6 +4570,15 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 		},
 		/* IT8689E + IT87952E */
 		.driver_data = &gigabyte_sio2_and_acpi,
+	},
+	{
+		.matches = {
+			DMI_MATCH(DMI_SYS_VENDOR,
+				  "Gigabyte Technology Co., Ltd."),
+			DMI_MATCH(DMI_BOARD_NAME, "X670E AORUS MASTER"),
+		},
+		/* IT8689E - Note there may also be a second chip */
+		.driver_data = &gigabyte_acpi_ignore,
 	},
 	{
 		.matches = {
