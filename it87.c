@@ -922,16 +922,12 @@ struct it87_data {
 	s8 auto_temp[NUM_AUTO_PWM][5];	/* [nr][0] is point1_temp_hyst */
 };
 
-/*
- * Board specific settings from DMI matching
- */
+/* Board specific settings from DMI matching */
 struct it87_dmi_data {
 	bool sio2_force_config;	/* force sio2 into configuration mode  */
 	u8 skip_pwm;		/* pwm channels to skip for this board  */
 	bool skip_acpi_res;	/* ignore acpi failures on this board */
-	/*
-	 * Callback for option setting
-	 */
+	/* Callback for option setting */
 	void (*apply_cb)(struct it87_sio_data *sio_data,
 			 struct it87_dmi_data *dmi_data);
 };
@@ -3762,14 +3758,12 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 		sio_data->beep_pin = superio_inb(sioaddr,
 						 IT87_SIO_BEEP_PIN_REG) & 0x3f;
 	}
-	/*
-	 * Set values based on DMI matches
-	 */
-	if (dmi_data && dmi_data->apply_cb)
-		dmi_data->apply_cb(sio_data, dmi_data);
-
 	if (sio_data->beep_pin)
 		pr_info("Beeping is supported\n");
+
+	/* Set values based on DMI matches */
+	if (dmi_data && dmi_data->apply_cb)
+		dmi_data->apply_cb(sio_data, dmi_data);
 
 	if (config->smbus_bitmap && !base) {
 		u8 reg;
