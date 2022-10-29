@@ -922,6 +922,20 @@ struct it87_data {
 	s8 auto_temp[NUM_AUTO_PWM][5];	/* [nr][0] is point1_temp_hyst */
 };
 
+/*
+ * Board specific settings from DMI matching
+ */
+struct it87_dmi_data {
+	bool sio2_force_config;	/* force sio2 into configuration mode  */
+	u8 skip_pwm;		/* pwm channels to skip for this board  */
+	bool skip_acpi_res;	/* ignore acpi failures on this board */
+	/*
+	 * Callback for option setting
+	 */
+	void (*apply_cb)(struct it87_sio_data *sio_data,
+			 struct it87_dmi_data *dmi_data);
+};
+
 static int adc_lsb(const struct it87_data *data, int nr)
 {
 	int lsb;
@@ -3079,7 +3093,8 @@ static const struct attribute_group it87_group_auto_pwm = {
 /* SuperIO detection - will change isa_address if a chip is found */
 static int __init it87_find(int sioaddr, unsigned short *address,
 			    phys_addr_t *mmio_address,
-			    struct it87_sio_data *sio_data)
+			    struct it87_sio_data *sio_data,
+			    struct it87_dmi_data *dmi_data)
 {
 	const struct it87_devices *config;
 	phys_addr_t base = 0;
@@ -3747,6 +3762,12 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 		sio_data->beep_pin = superio_inb(sioaddr,
 						 IT87_SIO_BEEP_PIN_REG) & 0x3f;
 	}
+	/*
+	 * Set values based on DMI matches
+	 */
+	if (dmi_data && dmi_data->apply_cb)
+		dmi_data->apply_cb(sio_data, dmi_data);
+
 	if (sio_data->beep_pin)
 		pr_info("Beeping is supported\n");
 
@@ -4394,11 +4415,19 @@ exit_device_put:
 	return err;
 }
 
-struct it87_dmi_data {
-	bool sio2_force_config;	/* force sio2 into configuration mode  */
-	u8 skip_pwm;		/* pwm channels to skip for this board  */
-	bool skip_acpi_res;	/* ignore acpi failures on this board */
-};
+static void it87_dmi_cb_apply_data(struct it87_sio_data *sio_data,
+				   struct it87_dmi_data *dmi_data)
+{
+	if (dmi_data->skip_pwm) {
+		pr_info("Disabling pwm2 due to hardware constraints\n");
+		sio_data->skip_pwm |= dmi_data->skip_pwm;
+	}
+
+	if (dmi_data->skip_acpi_res) {
+		pr_info("Ignoring expected ACPI resource conflict\n");
+		sio_data->skip_acpi_res = dmi_data->skip_acpi_res;
+	}
+}
 
 /*
  * On various Gigabyte AM4 boards (AB350, AX370), the second Super-IO chip
@@ -4428,6 +4457,7 @@ static struct it87_dmi_data gigabyte_sio2_force = {
  */
 static struct it87_dmi_data nvidia_fn68pt = {
 	.skip_pwm = BIT(1),
+	.apply_cb = it87_dmi_cb_apply_data,
 };
 
 /*
@@ -4443,6 +4473,7 @@ static struct it87_dmi_data nvidia_fn68pt = {
  */
 static struct it87_dmi_data gigabyte_acpi_ignore = {
 	.skip_acpi_res = true,
+	.apply_cb = it87_dmi_cb_apply_data,
 };
 
 /*
@@ -4451,6 +4482,7 @@ static struct it87_dmi_data gigabyte_acpi_ignore = {
 static struct it87_dmi_data gigabyte_sio2_and_acpi = {
 	.sio2_force_config = true,
 	.skip_acpi_res = true,
+	.apply_cb = it87_dmi_cb_apply_data,
 };
 
 static const struct dmi_system_id it87_dmi_table[] __initconst = {
@@ -4637,7 +4669,7 @@ static int __init sm_it87_init(void)
 		isa_address[i] = 0;
 		mmio_address = 0;
 		err = it87_find(sioaddr[i], &isa_address[i], &mmio_address,
-				&sio_data);
+				&sio_data, dmi_data);
 		if (err || isa_address[i] == 0)
 			continue;
 		/*
@@ -4647,10 +4679,6 @@ static int __init sm_it87_init(void)
 		if (i && isa_address[i] == isa_address[0])
 			break;
 
-		if (dmi_data) {
-			sio_data.skip_pwm |= dmi_data->skip_pwm;
-			sio_data.skip_acpi_res |= dmi_data->skip_acpi_res;
-		}
 		err = it87_device_add(i, isa_address[i], mmio_address,
 				      &sio_data);
 		if (err)
