@@ -4485,158 +4485,52 @@ static struct it87_dmi_data gigabyte_sio2_and_acpi = {
 	.apply_cb = it87_dmi_cb_apply_data,
 };
 
+#define IT87_DMI_MATCH_VND(vendor, name, data) \
+        { \
+		.matches = { \
+			DMI_EXACT_MATCH(DMI_BOARD_VENDOR, vendor), \
+			DMI_EXACT_MATCH(DMI_BOARD_NAME, name), \
+		}, \
+		.driver_data = data, \
+	}
+
+#define IT87_DMI_MATCH_GBT(name, data) \
+	IT87_DMI_MATCH_VND("Gigabyte Technology Co., Ltd.", name, data)
+
 static const struct dmi_system_id it87_dmi_table[] __initconst = {
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "AB350"),
-		},
+	IT87_DMI_MATCH_GBT("AB350", &gigabyte_sio2_force),
 		/* ? + IT8792E/IT8795E */
-		.driver_data = &gigabyte_sio2_force,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "AX370"),
-		},
+	IT87_DMI_MATCH_GBT("AX370", &gigabyte_sio2_force),
 		/* ? + IT8792E/IT8795E */
-		.driver_data = &gigabyte_sio2_force,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "Z97X-Gaming G1"),
-		},
+	IT87_DMI_MATCH_GBT("Z97X-Gaming G1", &gigabyte_sio2_force),
 		/* ? + IT8790E */
-		.driver_data = &gigabyte_sio2_force,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "TRX40 AORUS XTREME"),
-		},
+	IT87_DMI_MATCH_GBT("TRX40 AORUS XTREME", &gigabyte_sio2_and_acpi),
 		/* IT8688E + IT8792E/IT8795E */
-		.driver_data = &gigabyte_sio2_and_acpi,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "Z390 AORUS ULTRA-CF"),
-		},
+	IT87_DMI_MATCH_GBT("Z390 AORUS ULTRA-CF", &gigabyte_sio2_and_acpi),
 		/* IT8688E + IT8792E/IT8795E */
-		.driver_data = &gigabyte_sio2_and_acpi,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "Z490 AORUS ELITE AC"),
-		},
+	IT87_DMI_MATCH_GBT("Z490 AORUS ELITE AC", &gigabyte_acpi_ignore),
 		/* IT8688E */
-		.driver_data = &gigabyte_acpi_ignore,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "B550 AORUS PRO AC"),
-		},
+	IT87_DMI_MATCH_GBT("B550 AORUS PRO AC", &gigabyte_sio2_and_acpi),
 		/* IT8688E + IT8792E/IT8795E */
-		.driver_data = &gigabyte_sio2_and_acpi,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "B560I AORUS PRO AX"),
-		},
+	IT87_DMI_MATCH_GBT("B560I AORUS PRO AX", &gigabyte_acpi_ignore),
 		/* IT8689E */
-		.driver_data = &gigabyte_acpi_ignore,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "X570 AORUS ELITE WIFI"),
-		},
+	IT87_DMI_MATCH_GBT("X570 AORUS ELITE WIFI", &gigabyte_acpi_ignore),
 		/* IT8688E */
-		.driver_data = &gigabyte_acpi_ignore,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "X570 AORUS MASTER"),
-		},
+	IT87_DMI_MATCH_GBT("X570 AORUS MASTER", &gigabyte_sio2_and_acpi),
 		/* IT8688E + IT8792E/IT8795E */
-		.driver_data = &gigabyte_sio2_and_acpi,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "X570 AORUS PRO WIFI"),
-		},
+	IT87_DMI_MATCH_GBT("X570 AORUS PRO WIFI", &gigabyte_sio2_and_acpi),
 		/* IT8688E + IT8792E/IT8795E */
-		.driver_data = &gigabyte_sio2_and_acpi,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "X570 I AORUS PRO WIFI"),
-		},
+	IT87_DMI_MATCH_GBT("X570 I AORUS PRO WIFI", &gigabyte_acpi_ignore),
 		/* IT8688E */
-		.driver_data = &gigabyte_acpi_ignore,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "X570S AERO G"),
-		},
+	IT87_DMI_MATCH_GBT("X570S AERO G", &gigabyte_sio2_and_acpi),
 		/* IT8689E + IT87952E */
-		.driver_data = &gigabyte_sio2_and_acpi,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "X670E AORUS MASTER"),
-		},
+	IT87_DMI_MATCH_GBT("X670E AORUS MASTER", &gigabyte_acpi_ignore),
 		/* IT8689E - Note there may also be a second chip */
-		.driver_data = &gigabyte_acpi_ignore,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "Z690 AORUS PRO DDR4"),
-		},
+	IT87_DMI_MATCH_GBT("Z690 AORUS PRO DDR4", &gigabyte_sio2_and_acpi),
 		/* IT8689E + IT87952E */
-		.driver_data = &gigabyte_sio2_and_acpi,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "Z690 AORUS PRO"),
-		},
+	IT87_DMI_MATCH_GBT("Z690 AORUS PRO", &gigabyte_sio2_and_acpi),
 		/* IT8689E + IT87952E */
-		.driver_data = &gigabyte_sio2_and_acpi,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_BOARD_VENDOR, "nVIDIA"),
-			DMI_MATCH(DMI_BOARD_NAME, "FN68PT"),
-		},
-		.driver_data = &nvidia_fn68pt,
-	},
+	IT87_DMI_MATCH_VND("nVIDIA", "FN68PT", &nvidia_fn68pt),
 	{ }
 };
 MODULE_DEVICE_TABLE(dmi, it87_dmi_table);
