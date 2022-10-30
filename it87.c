@@ -833,7 +833,6 @@ struct it87_sio_data {
 	u8 skip_fan;
 	u8 skip_pwm;
 	u8 skip_temp;
-	bool skip_acpi_res;
 	u8 smbus_bitmap;
 	u8 ec_special_config;
 };
@@ -924,13 +923,12 @@ struct it87_data {
 
 /* Board specific settings from DMI matching */
 struct it87_dmi_data {
-	bool sio2_force_config;	/* force sio2 into configuration mode  */
 	u8 skip_pwm;		/* pwm channels to skip for this board  */
 	bool skip_acpi_res;	/* ignore acpi failures on this board */
-	/* Callback for option setting */
-	void (*apply_cb)(struct it87_sio_data *sio_data,
-			 struct it87_dmi_data *dmi_data);
 };
+
+/* Global for results from DMI matching, if needed */
+static struct it87_dmi_data *dmi_data = NULL;
 
 static int adc_lsb(const struct it87_data *data, int nr)
 {
@@ -3089,8 +3087,7 @@ static const struct attribute_group it87_group_auto_pwm = {
 /* SuperIO detection - will change isa_address if a chip is found */
 static int __init it87_find(int sioaddr, unsigned short *address,
 			    phys_addr_t *mmio_address,
-			    struct it87_sio_data *sio_data,
-			    struct it87_dmi_data *dmi_data)
+			    struct it87_sio_data *sio_data)
 {
 	const struct it87_devices *config;
 	phys_addr_t base = 0;
@@ -3762,8 +3759,8 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 		pr_info("Beeping is supported\n");
 
 	/* Set values based on DMI matches */
-	if (dmi_data && dmi_data->apply_cb)
-		dmi_data->apply_cb(sio_data, dmi_data);
+	if (dmi_data && dmi_data->skip_pwm)
+		sio_data->skip_pwm |= dmi_data->skip_pwm;
 
 	if (config->smbus_bitmap && !base) {
 		u8 reg;
@@ -4374,7 +4371,9 @@ static int __init it87_device_add(int index, unsigned short sio_address,
 
 	err = acpi_check_resource_conflict(&res);
 	if (err) {
-		if (!sio_data->skip_acpi_res && !ignore_resource_conflict)
+		if (dmi_data && dmi_data->skip_acpi_res)
+			pr_info("Ignoring expected ACPI resource conflict\n");
+		else if (!ignore_resource_conflict)
 			return err;
 	}
 
@@ -4409,18 +4408,15 @@ exit_device_put:
 	return err;
 }
 
-static void it87_dmi_cb_apply_data(struct it87_sio_data *sio_data,
-				   struct it87_dmi_data *dmi_data)
+/* callback function for DMI */
+static int it87_dmi_cb(const struct dmi_system_id *dmi_entry)
 {
-	if (dmi_data->skip_pwm) {
-		pr_info("Disabling pwm2 due to hardware constraints\n");
-		sio_data->skip_pwm |= dmi_data->skip_pwm;
-	}
+	dmi_data = dmi_entry->driver_data;
 
-	if (dmi_data->skip_acpi_res) {
-		pr_info("Ignoring expected ACPI resource conflict\n");
-		sio_data->skip_acpi_res = dmi_data->skip_acpi_res;
-	}
+	if (dmi_data && dmi_data->skip_pwm)
+		pr_info("Disabling pwm2 due to hardware constraints\n");
+
+	return 1;
 }
 
 /*
@@ -4437,8 +4433,11 @@ static void it87_dmi_cb_apply_data(struct it87_sio_data *sio_data,
  * DMI entries for those systems will be added as they become available and
  * as the problem is confirmed to affect those boards.
  */
-static struct it87_dmi_data gigabyte_sio2_force = {
-	.sio2_force_config = true,
+static int gigabyte_sio2_force(const struct dmi_system_id *dmi_entry)
+{
+	__superio_enter(REG_4E);
+
+	return it87_dmi_cb(dmi_entry);
 };
 
 /*
@@ -4451,7 +4450,6 @@ static struct it87_dmi_data gigabyte_sio2_force = {
  */
 static struct it87_dmi_data nvidia_fn68pt = {
 	.skip_pwm = BIT(1),
-	.apply_cb = it87_dmi_cb_apply_data,
 };
 
 /*
@@ -4467,20 +4465,11 @@ static struct it87_dmi_data nvidia_fn68pt = {
  */
 static struct it87_dmi_data gigabyte_acpi_ignore = {
 	.skip_acpi_res = true,
-	.apply_cb = it87_dmi_cb_apply_data,
 };
 
-/*
- * Handle setting multiple fields - see the definitions above.
- */
-static struct it87_dmi_data gigabyte_sio2_and_acpi = {
-	.sio2_force_config = true,
-	.skip_acpi_res = true,
-	.apply_cb = it87_dmi_cb_apply_data,
-};
-
-#define IT87_DMI_MATCH_VND(vendor, name, data) \
+#define IT87_DMI_MATCH_VND(vendor, name, cb, data) \
         { \
+		.callback = cb, \
 		.matches = { \
 			DMI_EXACT_MATCH(DMI_BOARD_VENDOR, vendor), \
 			DMI_EXACT_MATCH(DMI_BOARD_NAME, name), \
@@ -4488,51 +4477,62 @@ static struct it87_dmi_data gigabyte_sio2_and_acpi = {
 		.driver_data = data, \
 	}
 
-#define IT87_DMI_MATCH_GBT(name, data) \
-	IT87_DMI_MATCH_VND("Gigabyte Technology Co., Ltd.", name, data)
+#define IT87_DMI_MATCH_GBT(name, cb, data) \
+	IT87_DMI_MATCH_VND("Gigabyte Technology Co., Ltd.", name, cb, data)
 
 static const struct dmi_system_id it87_dmi_table[] __initconst = {
-	IT87_DMI_MATCH_GBT("AB350", &gigabyte_sio2_force),
+	IT87_DMI_MATCH_GBT("AB350", &gigabyte_sio2_force, NULL),
 		/* ? + IT8792E/IT8795E */
-	IT87_DMI_MATCH_GBT("AX370", &gigabyte_sio2_force),
+	IT87_DMI_MATCH_GBT("AX370", &gigabyte_sio2_force, NULL),
 		/* ? + IT8792E/IT8795E */
-	IT87_DMI_MATCH_GBT("Z97X-Gaming G1", &gigabyte_sio2_force),
+	IT87_DMI_MATCH_GBT("Z97X-Gaming G1", &gigabyte_sio2_force, NULL),
 		/* ? + IT8790E */
-	IT87_DMI_MATCH_GBT("TRX40 AORUS XTREME", &gigabyte_sio2_and_acpi),
+	IT87_DMI_MATCH_GBT("TRX40 AORUS XTREME", &gigabyte_sio2_force,
+			   &gigabyte_acpi_ignore),
 		/* IT8688E + IT8792E/IT8795E */
-	IT87_DMI_MATCH_GBT("Z390 AORUS ULTRA-CF", &gigabyte_sio2_and_acpi),
+	IT87_DMI_MATCH_GBT("Z390 AORUS ULTRA-CF", &gigabyte_sio2_force,
+			   &gigabyte_acpi_ignore),
 		/* IT8688E + IT8792E/IT8795E */
-	IT87_DMI_MATCH_GBT("Z490 AORUS ELITE AC", &gigabyte_acpi_ignore),
+	IT87_DMI_MATCH_GBT("Z490 AORUS ELITE AC", &it87_dmi_cb,
+			   &gigabyte_acpi_ignore),
 		/* IT8688E */
-	IT87_DMI_MATCH_GBT("B550 AORUS PRO AC", &gigabyte_sio2_and_acpi),
+	IT87_DMI_MATCH_GBT("B550 AORUS PRO AC", &gigabyte_sio2_force,
+			   &gigabyte_acpi_ignore),
 		/* IT8688E + IT8792E/IT8795E */
-	IT87_DMI_MATCH_GBT("B560I AORUS PRO AX", &gigabyte_acpi_ignore),
+	IT87_DMI_MATCH_GBT("B560I AORUS PRO AX", &it87_dmi_cb,
+			   &gigabyte_acpi_ignore),
 		/* IT8689E */
-	IT87_DMI_MATCH_GBT("X570 AORUS ELITE WIFI", &gigabyte_acpi_ignore),
+	IT87_DMI_MATCH_GBT("X570 AORUS ELITE WIFI", &it87_dmi_cb,
+			   &gigabyte_acpi_ignore),
 		/* IT8688E */
-	IT87_DMI_MATCH_GBT("X570 AORUS MASTER", &gigabyte_sio2_and_acpi),
+	IT87_DMI_MATCH_GBT("X570 AORUS MASTER", &gigabyte_sio2_force,
+			   &gigabyte_acpi_ignore),
 		/* IT8688E + IT8792E/IT8795E */
-	IT87_DMI_MATCH_GBT("X570 AORUS PRO WIFI", &gigabyte_sio2_and_acpi),
+	IT87_DMI_MATCH_GBT("X570 AORUS PRO WIFI", &gigabyte_sio2_force,
+			   &gigabyte_acpi_ignore),
 		/* IT8688E + IT8792E/IT8795E */
-	IT87_DMI_MATCH_GBT("X570 I AORUS PRO WIFI", &gigabyte_acpi_ignore),
+	IT87_DMI_MATCH_GBT("X570 I AORUS PRO WIFI", &it87_dmi_cb,
+			   &gigabyte_acpi_ignore),
 		/* IT8688E */
-	IT87_DMI_MATCH_GBT("X570S AERO G", &gigabyte_sio2_and_acpi),
+	IT87_DMI_MATCH_GBT("X570S AERO G", &gigabyte_sio2_force,
+			   &gigabyte_acpi_ignore),
 		/* IT8689E + IT87952E */
-	IT87_DMI_MATCH_GBT("X670E AORUS MASTER", &gigabyte_acpi_ignore),
+	IT87_DMI_MATCH_GBT("X670E AORUS MASTER", &it87_dmi_cb,
+			   &gigabyte_acpi_ignore),
 		/* IT8689E - Note there may also be a second chip */
-	IT87_DMI_MATCH_GBT("Z690 AORUS PRO DDR4", &gigabyte_sio2_and_acpi),
+	IT87_DMI_MATCH_GBT("Z690 AORUS PRO DDR4", &gigabyte_sio2_force,
+			   &gigabyte_acpi_ignore),
 		/* IT8689E + IT87952E */
-	IT87_DMI_MATCH_GBT("Z690 AORUS PRO", &gigabyte_sio2_and_acpi),
+	IT87_DMI_MATCH_GBT("Z690 AORUS PRO", &gigabyte_sio2_force,
+			   &gigabyte_acpi_ignore),
 		/* IT8689E + IT87952E */
-	IT87_DMI_MATCH_VND("nVIDIA", "FN68PT", &nvidia_fn68pt),
+	IT87_DMI_MATCH_VND("nVIDIA", "FN68PT", &it87_dmi_cb, &nvidia_fn68pt),
 	{ }
 };
 MODULE_DEVICE_TABLE(dmi, it87_dmi_table);
 
 static int __init sm_it87_init(void)
 {
-	const struct dmi_system_id *dmi = dmi_first_match(it87_dmi_table);
-	struct it87_dmi_data *dmi_data = NULL;
 	int sioaddr[2] = { REG_2E, REG_4E };
 	struct it87_sio_data sio_data;
 	unsigned short isa_address[2];
@@ -4542,22 +4542,18 @@ static int __init sm_it87_init(void)
 
 	pr_info("it87 driver version %s\n", IT87_DRIVER_VERSION);
 
-	if (dmi)
-		dmi_data = dmi->driver_data;
-
 	err = platform_driver_register(&it87_driver);
 	if (err)
 		return err;
 
-	if (dmi_data && dmi_data->sio2_force_config)
-		__superio_enter(REG_4E);
+	dmi_check_system(it87_dmi_table);
 
 	for (i = 0; i < ARRAY_SIZE(sioaddr); i++) {
 		memset(&sio_data, 0, sizeof(struct it87_sio_data));
 		isa_address[i] = 0;
 		mmio_address = 0;
 		err = it87_find(sioaddr[i], &isa_address[i], &mmio_address,
-				&sio_data, dmi_data);
+				&sio_data);
 		if (err || isa_address[i] == 0)
 			continue;
 		/*
