@@ -4508,6 +4508,9 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 	IT87_DMI_MATCH_GBT("X570 AORUS MASTER", gigabyte_sio2_force,
 			   &gigabyte_acpi_ignore),
 		/* IT8688E + IT8792E/IT8795E */
+	IT87_DMI_MATCH_GBT("X570 AORUS PRO", gigabyte_sio2_force,
+			   &gigabyte_acpi_ignore),
+		/* IT8688E + IT8792E/IT8795E */
 	IT87_DMI_MATCH_GBT("X570 AORUS PRO WIFI", gigabyte_sio2_force,
 			   &gigabyte_acpi_ignore),
 		/* IT8688E + IT8792E/IT8795E */
