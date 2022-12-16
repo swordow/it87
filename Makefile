@@ -98,8 +98,8 @@ dkms:
 	@cp ./compat.h $(DKMS_ROOT_PATH)
 	@cp ./it87.c $(DKMS_ROOT_PATH)
 	@dkms add -m $(DRIVER) -v $(DRIVER_VERSION)
-	@dkms build -m $(DRIVER) -v $(DRIVER_VERSION) --kernelsourcedir=$(KERNEL_BUILD)
-	@dkms install --force -m $(DRIVER) -v $(DRIVER_VERSION)
+	@dkms build -m $(DRIVER) -v $(DRIVER_VERSION) -k $(TARGET)
+	@dkms install --force -m $(DRIVER) -v $(DRIVER_VERSION) -k $(TARGET)
 	@modprobe $(DRIVER)
 
 dkms_clean:
