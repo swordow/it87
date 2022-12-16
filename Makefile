@@ -92,11 +92,11 @@ dkms:
 	@sed -i -e '/^PACKAGE_VERSION=/ s/=.*/=\"$(DRIVER_VERSION)\"/' dkms.conf
 	@echo "$(DRIVER_VERSION)" >VERSION
 	@mkdir -p $(DKMS_ROOT_PATH)
-	@cp `pwd`/dkms.conf $(DKMS_ROOT_PATH)
-	@cp `pwd`/VERSION $(DKMS_ROOT_PATH)
-	@cp `pwd`/Makefile $(DKMS_ROOT_PATH)
-	@cp `pwd`/compat.h $(DKMS_ROOT_PATH)
-	@cp `pwd`/it87.c $(DKMS_ROOT_PATH)
+	@cp ./dkms.conf $(DKMS_ROOT_PATH)
+	@cp ./VERSION $(DKMS_ROOT_PATH)
+	@cp ./Makefile $(DKMS_ROOT_PATH)
+	@cp ./compat.h $(DKMS_ROOT_PATH)
+	@cp ./it87.c $(DKMS_ROOT_PATH)
 	@dkms add -m $(DRIVER) -v $(DRIVER_VERSION)
 	@dkms build -m $(DRIVER) -v $(DRIVER_VERSION) --kernelsourcedir=$(KERNEL_BUILD)
 	@dkms install --force -m $(DRIVER) -v $(DRIVER_VERSION)
