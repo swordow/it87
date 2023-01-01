@@ -4458,9 +4458,9 @@ static struct it87_dmi_data nvidia_fn68pt = {
  * Most commonly this is seen on boards with multiple ITE chips.
  * In this case we just ignore the failure and continue on.
  * This is effectively the same as the use of either
- * acpi_enforce_resources=lax (kernel)
+ *     acpi_enforce_resources=lax (kernel)
  * or
- * ignore_resource_conflict=1 (it87)
+ *     ignore_resource_conflict=1 (it87)
  * but set programatically.
  */
 static struct it87_dmi_data gigabyte_acpi_ignore = {
