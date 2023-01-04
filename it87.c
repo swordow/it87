@@ -4433,7 +4433,7 @@ static int it87_dmi_cb(const struct dmi_system_id *dmi_entry)
  * DMI entries for those systems will be added as they become available and
  * as the problem is confirmed to affect those boards.
  */
-static int gigabyte_sio2_force(const struct dmi_system_id *dmi_entry)
+static int it87_sio2_force(const struct dmi_system_id *dmi_entry)
 {
 	__superio_enter(REG_4E);
 
@@ -4463,7 +4463,7 @@ static struct it87_dmi_data nvidia_fn68pt = {
  *     ignore_resource_conflict=1 (it87)
  * but set programatically.
  */
-static struct it87_dmi_data gigabyte_acpi_ignore = {
+static struct it87_dmi_data it87_acpi_ignore = {
 	.skip_acpi_res = true,
 };
 
@@ -4481,53 +4481,53 @@ static struct it87_dmi_data gigabyte_acpi_ignore = {
 	IT87_DMI_MATCH_VND("Gigabyte Technology Co., Ltd.", name, cb, data)
 
 static const struct dmi_system_id it87_dmi_table[] __initconst = {
-	IT87_DMI_MATCH_GBT("AB350", gigabyte_sio2_force, NULL),
+	IT87_DMI_MATCH_GBT("AB350", it87_sio2_force, NULL),
 		/* ? + IT8792E/IT8795E */
-	IT87_DMI_MATCH_GBT("AX370", gigabyte_sio2_force, NULL),
+	IT87_DMI_MATCH_GBT("AX370", it87_sio2_force, NULL),
 		/* ? + IT8792E/IT8795E */
-	IT87_DMI_MATCH_GBT("Z97X-Gaming G1", gigabyte_sio2_force, NULL),
+	IT87_DMI_MATCH_GBT("Z97X-Gaming G1", it87_sio2_force, NULL),
 		/* ? + IT8790E */
-	IT87_DMI_MATCH_GBT("TRX40 AORUS XTREME", gigabyte_sio2_force,
-			   &gigabyte_acpi_ignore),
+	IT87_DMI_MATCH_GBT("TRX40 AORUS XTREME", it87_sio2_force,
+			   &it87_acpi_ignore),
 		/* IT8688E + IT8792E/IT8795E */
-	IT87_DMI_MATCH_GBT("Z390 AORUS ULTRA-CF", gigabyte_sio2_force,
-			   &gigabyte_acpi_ignore),
+	IT87_DMI_MATCH_GBT("Z390 AORUS ULTRA-CF", it87_sio2_force,
+			   &it87_acpi_ignore),
 		/* IT8688E + IT8792E/IT8795E */
 	IT87_DMI_MATCH_GBT("Z490 AORUS ELITE AC", it87_dmi_cb,
-			   &gigabyte_acpi_ignore),
+			   &it87_acpi_ignore),
 		/* IT8688E */
-	IT87_DMI_MATCH_GBT("B550 AORUS PRO AC", gigabyte_sio2_force,
-			   &gigabyte_acpi_ignore),
+	IT87_DMI_MATCH_GBT("B550 AORUS PRO AC", it87_sio2_force,
+			   &it87_acpi_ignore),
 		/* IT8688E + IT8792E/IT8795E */
 	IT87_DMI_MATCH_GBT("B560I AORUS PRO AX", it87_dmi_cb,
-			   &gigabyte_acpi_ignore),
+			   &it87_acpi_ignore),
 		/* IT8689E */
 	IT87_DMI_MATCH_GBT("X570 AORUS ELITE WIFI", it87_dmi_cb,
-			   &gigabyte_acpi_ignore),
+			   &it87_acpi_ignore),
 		/* IT8688E */
-	IT87_DMI_MATCH_GBT("X570 AORUS MASTER", gigabyte_sio2_force,
-			   &gigabyte_acpi_ignore),
+	IT87_DMI_MATCH_GBT("X570 AORUS MASTER", it87_sio2_force,
+			   &it87_acpi_ignore),
 		/* IT8688E + IT8792E/IT8795E */
-	IT87_DMI_MATCH_GBT("X570 AORUS PRO", gigabyte_sio2_force,
-			   &gigabyte_acpi_ignore),
+	IT87_DMI_MATCH_GBT("X570 AORUS PRO", it87_sio2_force,
+			   &it87_acpi_ignore),
 		/* IT8688E + IT8792E/IT8795E */
-	IT87_DMI_MATCH_GBT("X570 AORUS PRO WIFI", gigabyte_sio2_force,
-			   &gigabyte_acpi_ignore),
+	IT87_DMI_MATCH_GBT("X570 AORUS PRO WIFI", it87_sio2_force,
+			   &it87_acpi_ignore),
 		/* IT8688E + IT8792E/IT8795E */
 	IT87_DMI_MATCH_GBT("X570 I AORUS PRO WIFI", it87_dmi_cb,
-			   &gigabyte_acpi_ignore),
+			   &it87_acpi_ignore),
 		/* IT8688E */
-	IT87_DMI_MATCH_GBT("X570S AERO G", gigabyte_sio2_force,
-			   &gigabyte_acpi_ignore),
+	IT87_DMI_MATCH_GBT("X570S AERO G", it87_sio2_force,
+			   &it87_acpi_ignore),
 		/* IT8689E + IT87952E */
 	IT87_DMI_MATCH_GBT("X670E AORUS MASTER", it87_dmi_cb,
-			   &gigabyte_acpi_ignore),
+			   &it87_acpi_ignore),
 		/* IT8689E - Note there may also be a second chip */
-	IT87_DMI_MATCH_GBT("Z690 AORUS PRO DDR4", gigabyte_sio2_force,
-			   &gigabyte_acpi_ignore),
+	IT87_DMI_MATCH_GBT("Z690 AORUS PRO DDR4", it87_sio2_force,
+			   &it87_acpi_ignore),
 		/* IT8689E + IT87952E */
-	IT87_DMI_MATCH_GBT("Z690 AORUS PRO", gigabyte_sio2_force,
-			   &gigabyte_acpi_ignore),
+	IT87_DMI_MATCH_GBT("Z690 AORUS PRO", it87_sio2_force,
+			   &it87_acpi_ignore),
 		/* IT8689E + IT87952E */
 	IT87_DMI_MATCH_VND("nVIDIA", "FN68PT", it87_dmi_cb, &nvidia_fn68pt),
 	{ }
