@@ -214,8 +214,9 @@ static inline void superio_exit(int ioreg, bool doexit)
 #define IT87_SIO_VID_REG	0xfc	/* VID value */
 #define IT87_SIO_BEEP_PIN_REG	0xf6	/* Beep pin mapping */
 
-/* Force chip ID to specified value. Should only be used for testing */
-static unsigned short force_id;
+/* Force chip IDs to specified value. Should only be used for testing */
+static unsigned short force_id[2];
+static unsigned int force_id_cnt;
 
 /* ACPI resource conflicts are ignored if this parameter is set to 1 */
 static bool ignore_resource_conflict;
@@ -3087,7 +3088,8 @@ static const struct attribute_group it87_group_auto_pwm = {
 /* SuperIO detection - will change isa_address if a chip is found */
 static int __init it87_find(int sioaddr, unsigned short *address,
 			    phys_addr_t *mmio_address,
-			    struct it87_sio_data *sio_data)
+			    struct it87_sio_data *sio_data,
+			    int chip_cnt)
 {
 	const struct it87_devices *config;
 	phys_addr_t base = 0;
@@ -3108,8 +3110,10 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 	if (chip_type == 0xffff)
 		goto exit;
 
-	if (force_id)
-		chip_type = force_id;
+	if (force_id_cnt == 1)
+		chip_type = force_id[0];
+	else if (force_id[chip_cnt])
+		chip_type = force_id[chip_cnt];
 
 	switch (chip_type) {
 	case IT8705F_DEVID:
@@ -4556,7 +4560,7 @@ static int __init sm_it87_init(void)
 		isa_address[i] = 0;
 		mmio_address = 0;
 		err = it87_find(sioaddr[i], &isa_address[i], &mmio_address,
-				&sio_data);
+				&sio_data, i);
 		if (err || isa_address[i] == 0)
 			continue;
 		/*
@@ -4606,8 +4610,8 @@ static void __exit sm_it87_exit(void)
 MODULE_AUTHOR("Chris Gauthron, Jean Delvare <jdelvare@suse.de>");
 MODULE_DESCRIPTION("IT8705F/IT871xF/IT872xF hardware monitoring driver");
 
-module_param(force_id, ushort, 0);
-MODULE_PARM_DESC(force_id, "Override the detected device ID");
+module_param_array(force_id, ushort, &force_id_cnt, 0);
+MODULE_PARM_DESC(force_id, "Override one or more detected device ID(s)");
 
 module_param(ignore_resource_conflict, bool, 0);
 MODULE_PARM_DESC(ignore_resource_conflict, "Ignore ACPI resource conflict");
