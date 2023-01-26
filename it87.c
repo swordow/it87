@@ -214,7 +214,7 @@ static inline void superio_exit(int ioreg, bool doexit)
 #define IT87_SIO_VID_REG	0xfc	/* VID value */
 #define IT87_SIO_BEEP_PIN_REG	0xf6	/* Beep pin mapping */
 
-/* Force chip IDs to specified value. Should only be used for testing */
+/* Force chip IDs to specified values. Should only be used for testing */
 static unsigned short force_id[2];
 static unsigned int force_id_cnt;
 
@@ -3110,9 +3110,11 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 	if (chip_type == 0xffff)
 		goto exit;
 
-	if (force_id_cnt == 1)
-		chip_type = force_id[0];
-	else if (force_id[chip_cnt])
+	if (force_id_cnt == 1) {
+		/* If only one value given use for all chips */
+		if (force_id[0])
+			chip_type = force_id[0];
+	} else if (force_id[chip_cnt])
 		chip_type = force_id[chip_cnt];
 
 	switch (chip_type) {
