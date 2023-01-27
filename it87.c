@@ -3235,17 +3235,19 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 		goto exit;
 	}
 
+	config = &it87_devices[sio_data->type];
+
 	superio_select(sioaddr, PME);
 	if (!(superio_inb(sioaddr, IT87_ACT_REG) & 0x01)) {
 		pr_info("Device (chip %s ioreg 0x%x) not activated, skipping\n",
-			it87_devices[chip_type].model, sioaddr);
+			config->model, sioaddr);
 		goto exit;
 	}
 
 	*address = superio_inw(sioaddr, IT87_BASE_REG) & ~(IT87_EXTENT - 1);
 	if (*address == 0) {
 		pr_info("Base address not set (chip %s ioreg 0x%x), skipping\n",
-			it87_devices[chip_type].model, sioaddr);
+			config->model, sioaddr);
 		goto exit;
 	}
 
@@ -3253,8 +3255,6 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 
 	err = 0;
 	sio_data->revision = superio_inb(sioaddr, DEVREV) & 0x0f;
-
-	config = &it87_devices[sio_data->type];
 
 	if (has_mmio(config) && mmio) {
 		u8 reg;
