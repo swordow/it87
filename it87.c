@@ -146,9 +146,9 @@ static inline int superio_enter(int ioreg)
 	return 0;
 }
 
-static inline void superio_exit(int ioreg, bool doexit)
+static inline void superio_exit(int ioreg, bool noexit)
 {
-	if (doexit) {
+	if (!noexit) {
 		outb(0x02, ioreg);
 		outb(0x02, ioreg + 1);
 	}
@@ -385,6 +385,13 @@ struct it87_devices {
 #define FEAT_NEW_TEMPMAP	BIT(25)	/* new temp input selection */
 #define FEAT_MMIO		BIT(26)	/* Chip supports MMIO */
 #define FEAT_FOUR_TEMP		BIT(27)
+/*
+ * Disabling configuration mode on some chips can result in system
+ * hang-ups and access failures to the Super-IO chip at the
+ * second SIO address. Never exit configuration mode on these
+ * chips to avoid the problem.
+ */
+#define FEAT_CONF_NOEXIT	BIT(28)	/* Chip should not exit conf mode */
 
 static const struct it87_devices it87_devices[] = {
 	[it87] = {
@@ -581,7 +588,8 @@ static const struct it87_devices it87_devices[] = {
 		.model = "IT8790E",
 		.features = FEAT_NEWER_AUTOPWM | FEAT_10_9MV_ADC | FEAT_SCALING
 		  | FEAT_16BIT_FANS | FEAT_TEMP_PECI
-		  | FEAT_IN7_INTERNAL | FEAT_PWM_FREQ2 | FEAT_FANCTL_ONOFF,
+		  | FEAT_IN7_INTERNAL | FEAT_PWM_FREQ2 | FEAT_FANCTL_ONOFF
+		  | FEAT_CONF_NOEXIT,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
 		.num_temp_map = 3,
@@ -592,7 +600,8 @@ static const struct it87_devices it87_devices[] = {
 		.model = "IT8792E/IT8795E",
 		.features = FEAT_NEWER_AUTOPWM | FEAT_10_9MV_ADC | FEAT_SCALING
 		  | FEAT_16BIT_FANS | FEAT_TEMP_PECI
-		  | FEAT_IN7_INTERNAL | FEAT_PWM_FREQ2 | FEAT_FANCTL_ONOFF,
+		  | FEAT_IN7_INTERNAL | FEAT_PWM_FREQ2 | FEAT_FANCTL_ONOFF
+		  | FEAT_CONF_NOEXIT,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
 		.num_temp_map = 3,
@@ -773,7 +782,8 @@ static const struct it87_devices it87_devices[] = {
 		.model = "IT87952E",
 		.features = FEAT_NEWER_AUTOPWM | FEAT_10_9MV_ADC | FEAT_SCALING
 		  | FEAT_16BIT_FANS | FEAT_TEMP_PECI
-		  | FEAT_IN7_INTERNAL | FEAT_PWM_FREQ2 | FEAT_FANCTL_ONOFF,
+		  | FEAT_IN7_INTERNAL | FEAT_PWM_FREQ2 | FEAT_FANCTL_ONOFF
+		  | FEAT_CONF_NOEXIT,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
 		.num_temp_map = 3,
@@ -817,11 +827,11 @@ static const struct it87_devices it87_devices[] = {
 #define has_new_tempmap(data)	((data)->features & FEAT_NEW_TEMPMAP)
 #define has_mmio(data)		((data)->features & FEAT_MMIO)
 #define has_four_temp(data)	((data)->features & FEAT_FOUR_TEMP)
+#define has_conf_noexit(data)	((data)->features & FEAT_CONF_NOEXIT)
 
 struct it87_sio_data {
 	enum chips type;
 	u8 sioaddr;
-	u8 doexit;
 	/* Values read from Super-I/O config space */
 	u8 revision;
 	u8 vid_value;
@@ -853,7 +863,6 @@ struct it87_data {
 	u8 saved_bank;		/* saved bank register value */
 	u8 ec_special_config;	/* EC special config register restore value */
 	u8 sioaddr;		/* SIO port address */
-	bool doexit;		/* true if exit from sio config is ok */
 
 	void __iomem *mmio;	/* Remapped MMIO address if available */
 	int (*read)(struct it87_data *, u16);
@@ -1074,7 +1083,7 @@ static int smbus_disable(struct it87_data *data)
 		superio_select(data->sioaddr, PME);
 		superio_outb(data->sioaddr, IT87_SPECIAL_CFG_REG,
 				data->ec_special_config & ~data->smbus_bitmap);
-		superio_exit(data->sioaddr, data->doexit);
+		superio_exit(data->sioaddr, has_conf_noexit(data));
 		if (has_bank_sel(data) && !data->mmio)
 			data->saved_bank = _it87_io_read(data, IT87_REG_BANK);
 	}
@@ -1095,7 +1104,7 @@ static int smbus_enable(struct it87_data *data)
 		superio_select(data->sioaddr, PME);
 		superio_outb(data->sioaddr, IT87_SPECIAL_CFG_REG,
 				data->ec_special_config);
-		superio_exit(data->sioaddr, data->doexit);
+		superio_exit(data->sioaddr, has_conf_noexit(data));
 	}
 	return 0;
 }
@@ -3093,7 +3102,6 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 {
 	const struct it87_devices *config;
 	phys_addr_t base = 0;
-	bool doexit = true;
 	char mmio_str[32];
 	u16 chip_type;
 	int err;
@@ -3151,13 +3159,6 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 		break;
 	case IT8792E_DEVID:
 		sio_data->type = it8792;
-		/*
-		 * Disabling configuration mode on IT8792E can result in system
-		 * hang-ups and access failures to the Super-IO chip at the
-		 * second SIO address. Never exit configuration mode on this
-		 * chip to avoid the problem.
-		 */
-		doexit = false;
 		break;
 	case IT8771E_DEVID:
 		sio_data->type = it8771;
@@ -3179,7 +3180,6 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 		break;
 	case IT8790E_DEVID:
 		sio_data->type = it8790;
-		doexit = false;    /* See IT8792E comment above */
 		break;
 	case IT8603E_DEVID:
 	case IT8623E_DEVID:
@@ -3226,7 +3226,6 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 		break;
 	case IT87952E_DEVID:
 		sio_data->type = it87952;
-		doexit = false;    /* See IT8792E comment above */
 		break;
 	case 0xffff:  /* No device at all */
 		goto exit;
@@ -3250,8 +3249,6 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 			config->model, sioaddr);
 		goto exit;
 	}
-
-	sio_data->doexit = doexit;
 
 	err = 0;
 	sio_data->revision = superio_inb(sioaddr, DEVREV) & 0x0f;
@@ -3778,7 +3775,7 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 	}
 
 exit:
-	superio_exit(sioaddr, doexit);
+	superio_exit(sioaddr, has_conf_noexit(config));
 	return err;
 }
 
@@ -4131,7 +4128,6 @@ static int it87_probe(struct platform_device *pdev)
 	data->sioaddr = sio_data->sioaddr;
 	data->smbus_bitmap = sio_data->smbus_bitmap;
 	data->ec_special_config = sio_data->ec_special_config;
-	data->doexit = sio_data->doexit;
 	data->features = it87_devices[sio_data->type].features;
 	data->num_temp_limit = it87_devices[sio_data->type].num_temp_limit;
 	data->num_temp_offset = it87_devices[sio_data->type].num_temp_offset;
@@ -4315,7 +4311,7 @@ static void it87_resume_sio(struct platform_device *pdev)
 			     reg2c);
 	}
 
-	superio_exit(data->sioaddr, data->doexit);
+	superio_exit(data->sioaddr, has_conf_noexit(data));
 }
 
 static int it87_resume(struct device *dev)
