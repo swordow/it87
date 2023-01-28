@@ -3100,7 +3100,7 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 			    struct it87_sio_data *sio_data,
 			    int chip_cnt)
 {
-	const struct it87_devices *config;
+	const struct it87_devices *config = NULL;
 	phys_addr_t base = 0;
 	char mmio_str[32];
 	u16 chip_type;
@@ -3775,7 +3775,7 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 	}
 
 exit:
-	superio_exit(sioaddr, has_conf_noexit(config));
+	superio_exit(sioaddr, config ? has_conf_noexit(config) : false);
 	return err;
 }
 
