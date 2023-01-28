@@ -10,8 +10,7 @@ fi
 DRV_NAME="$(basename $(pwd))"
 DRV_VERSION=$(dkms status ${DRV_NAME} -k $(uname -r) | cut -d, -f1 | cut -d/ -f2)
 
-dkms remove ${DRV_NAME}/${DRV_VERSION} --all
-rm -rf /usr/src/${DRV_NAME}-${DRV_VERSION}
+make -f Makefile DRIVER=$DRV_NAME DRIVER_VERSION=$DRV_VERSION dkms_clean
 
 RESULT=$?
 if [[ "$RESULT" != "0" ]]; then
