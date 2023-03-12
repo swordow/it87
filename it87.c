@@ -20,7 +20,6 @@
  *            IT8623E  Super I/O chip w/LPC interface
  *            IT8625E  Super I/O chip w/LPC interface
  *            IT8628E  Super I/O chip w/LPC interface
- *            IT8528E  Super I/O chip w/LPC interface
  *            IT8655E  Super I/O chip w/LPC interface
  *            IT8665E  Super I/O chip w/LPC interface
  *            IT8686E  Super I/O chip w/LPC interface
@@ -83,7 +82,7 @@ enum chips { it87, it8712, it8716, it8718, it8720, it8721, it8728, it8732,
 	     it8736, it8738,
 	     it8771, it8772, it8781, it8782, it8783, it8786, it8790,
 	     it8792, it8603, it8606, it8607, it8613, it8620, it8622, it8625,
-	     it8628, it8528, it8655, it8665, it8686, it8688, it8689, it87952 };
+	     it8628, it8655, it8665, it8686, it8688, it8689, it87952 };
 
 static struct platform_device *it87_pdev[2];
 
@@ -184,7 +183,6 @@ static inline void superio_exit(int ioreg, bool noexit)
 #define IT8623E_DEVID 0x8623
 #define IT8625E_DEVID 0x8625
 #define IT8628E_DEVID 0x8628
-#define IT8528E_DEVID 0x8528
 #define IT8655E_DEVID 0x8655
 #define IT8665E_DEVID 0x8665
 #define IT8686E_DEVID 0x8686
@@ -693,19 +691,6 @@ static const struct it87_devices it87_devices[] = {
 	[it8628] = {
 		.name = "it8628",
 		.model = "IT8628E",
-		.features = FEAT_NEWER_AUTOPWM | FEAT_12MV_ADC | FEAT_16BIT_FANS
-		  | FEAT_TEMP_PECI | FEAT_SIX_FANS
-		  | FEAT_IN7_INTERNAL | FEAT_SIX_PWM | FEAT_PWM_FREQ2
-		  | FEAT_SIX_TEMP | FEAT_AVCC3
-		  | FEAT_FANCTL_ONOFF,
-		.num_temp_limit = 6,
-		.num_temp_offset = 3,
-		.num_temp_map = 3,
-		.peci_mask = 0x07,
-	},
-	[it8528] = {
-		.name = "it8528",
-		.model = "IT8528E",
 		.features = FEAT_NEWER_AUTOPWM | FEAT_12MV_ADC | FEAT_16BIT_FANS
 		  | FEAT_TEMP_PECI | FEAT_SIX_FANS
 		  | FEAT_IN7_INTERNAL | FEAT_SIX_PWM | FEAT_PWM_FREQ2
@@ -3206,9 +3191,6 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 	case IT8628E_DEVID:
 		sio_data->type = it8628;
 		break;
-	case IT8528E_DEVID:
-		sio_data->type = it8528;
-		break;
 	case IT8655E_DEVID:
 		sio_data->type = it8655;
 		break;
@@ -3444,7 +3426,7 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 
 	}
 	else if (sio_data->type == it8620 || sio_data->type == it8628 ||
-		 sio_data->type == it8528 || sio_data->type == it8686 ||
+		 sio_data->type == it8686 ||
 		 sio_data->type == it8688 || sio_data->type == it8689) {
 		int reg;
 
@@ -3786,7 +3768,6 @@ static void it87_init_regs(struct platform_device *pdev)
 	/* Initialize chip specific register pointers */
 	switch (data->type) {
 	case it8628:
-	case it8528:
 	case it8686:
 	case it8688:
 	case it8689:
@@ -3994,7 +3975,6 @@ static void it87_init_device(struct platform_device *pdev)
 		switch (data->type) {
 		case it8620:
 		case it8628:
-		case it8528:
 		case it8686:
 		case it8688:
 		case it8689:
