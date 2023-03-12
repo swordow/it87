@@ -379,7 +379,6 @@ struct it87_devices {
 #define FEAT_FOUR_FANS		BIT(19)	/* Supports four fans */
 #define FEAT_FOUR_PWM		BIT(20)	/* Supports four fan controls */
 #define FEAT_BANK_SEL		BIT(21)	/* Chip has multi-bank support */
-/*#define FEAT_SCALING		BIT(22) */	/* Internal voltage scaling */
 #define FEAT_FANCTL_ONOFF	BIT(23)	/* chip has FAN_CTL ON/OFF */
 #define FEAT_11MV_ADC		BIT(24)
 #define FEAT_NEW_TEMPMAP	BIT(25)	/* new temp input selection */
