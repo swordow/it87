@@ -4463,6 +4463,9 @@ static struct it87_dmi_data it87_acpi_ignore = {
 	IT87_DMI_MATCH_VND("Gigabyte Technology Co., Ltd.", name, cb, data)
 
 static const struct dmi_system_id it87_dmi_table[] __initconst = {
+	IT87_DMI_MATCH_GBT("A320M-S2H V2-CF", it87_dmi_cb,
+			   &it87_acpi_ignore),
+		/* IT8686E */
 	IT87_DMI_MATCH_GBT("AB350", it87_sio2_force, NULL),
 		/* ? + IT8792E/IT8795E */
 	IT87_DMI_MATCH_GBT("AX370", it87_sio2_force, NULL),
