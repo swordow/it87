@@ -374,21 +374,21 @@ struct it87_devices {
 #define FEAT_PWM_FREQ2		BIT(16)	/* Separate pwm freq 2 */
 #define FEAT_SIX_TEMP		BIT(17)	/* Up to 6 temp sensors */
 #define FEAT_VIN3_5V		BIT(18)	/* VIN3 connected to +5V */
-#define FEAT_FOUR_FANS		BIT(19)	/* Supports four fans */
-#define FEAT_FOUR_PWM		BIT(20)	/* Supports four fan controls */
-#define FEAT_BANK_SEL		BIT(21)	/* Chip has multi-bank support */
-#define FEAT_FANCTL_ONOFF	BIT(23)	/* chip has FAN_CTL ON/OFF */
-#define FEAT_11MV_ADC		BIT(24)
-#define FEAT_NEW_TEMPMAP	BIT(25)	/* new temp input selection */
-#define FEAT_MMIO		BIT(26)	/* Chip supports MMIO */
-#define FEAT_FOUR_TEMP		BIT(27)
 /*
  * Disabling configuration mode on some chips can result in system
  * hang-ups and access failures to the Super-IO chip at the
  * second SIO address. Never exit configuration mode on these
  * chips to avoid the problem.
  */
-#define FEAT_CONF_NOEXIT	BIT(28)	/* Chip should not exit conf mode */
+#define FEAT_CONF_NOEXIT	BIT(19)	/* Chip should not exit conf mode */
+#define FEAT_FOUR_FANS		BIT(20)	/* Supports four fans */
+#define FEAT_FOUR_PWM		BIT(21)	/* Supports four fan controls */
+#define FEAT_FOUR_TEMP		BIT(22)
+#define FEAT_FANCTL_ONOFF	BIT(23)	/* chip has FAN_CTL ON/OFF */
+#define FEAT_NEW_TEMPMAP	BIT(24)	/* new temp input selection */
+#define FEAT_BANK_SEL		BIT(25)	/* Chip has multi-bank support */
+#define FEAT_11MV_ADC		BIT(26)
+#define FEAT_MMIO		BIT(27)	/* Chip supports MMIO */
 
 static const struct it87_devices it87_devices[] = {
 	[it87] = {
@@ -777,6 +777,7 @@ static const struct it87_devices it87_devices[] = {
 
 #define has_16bit_fans(data)	((data)->features & FEAT_16BIT_FANS)
 #define has_12mv_adc(data)	((data)->features & FEAT_12MV_ADC)
+#define has_11mv_adc(data)	((data)->features & FEAT_11MV_ADC)
 #define has_10_9mv_adc(data)	((data)->features & FEAT_10_9MV_ADC)
 #define has_newer_autopwm(data)	((data)->features & FEAT_NEWER_AUTOPWM)
 #define has_old_autopwm(data)	((data)->features & FEAT_OLD_AUTOPWM)
@@ -786,34 +787,33 @@ static const struct it87_devices it87_devices[] = {
 				(((data)->features & FEAT_TEMP_OLD_PECI) && \
 				 ((data)->old_peci_mask & BIT(nr)))
 #define has_fan16_config(data)	((data)->features & FEAT_FAN16_CONFIG)
-#define has_five_fans(data)	((data)->features & (FEAT_FIVE_FANS | \
-						     FEAT_SIX_FANS))
-#define has_vid(data)		((data)->features & FEAT_VID)
-#define has_in7_internal(data)	((data)->features & FEAT_IN7_INTERNAL)
-#define has_six_fans(data)	((data)->features & FEAT_SIX_FANS)
-#define has_avcc3(data)		((data)->features & FEAT_AVCC3)
-#define has_five_pwm(data)	((data)->features & (FEAT_FIVE_PWM \
-						     | FEAT_SIX_PWM))
-#define has_six_pwm(data)	((data)->features & FEAT_SIX_PWM)
-#define has_pwm_freq2(data)	((data)->features & FEAT_PWM_FREQ2)
-#define has_six_temp(data)	((data)->features & FEAT_SIX_TEMP)
-#define has_vin3_5v(data)	((data)->features & FEAT_VIN3_5V)
 #define has_four_fans(data)	((data)->features & (FEAT_FOUR_FANS | \
 						     FEAT_FIVE_FANS | \
 						     FEAT_SIX_FANS))
+#define has_five_fans(data)	((data)->features & (FEAT_FIVE_FANS | \
+						     FEAT_SIX_FANS))
+#define has_six_fans(data)	((data)->features & FEAT_SIX_FANS)
+#define has_vid(data)		((data)->features & FEAT_VID)
+#define has_in7_internal(data)	((data)->features & FEAT_IN7_INTERNAL)
+#define has_avcc3(data)		((data)->features & FEAT_AVCC3)
 #define has_four_pwm(data)	((data)->features & (FEAT_FOUR_PWM | \
-						     FEAT_FIVE_PWM \
-						     | FEAT_SIX_PWM))
-#define has_bank_sel(data)	((data)->features & FEAT_BANK_SEL)
+						     FEAT_FIVE_PWM | \
+						     FEAT_SIX_PWM))
+#define has_five_pwm(data)	((data)->features & (FEAT_FIVE_PWM | \
+						     FEAT_SIX_PWM))
+#define has_six_pwm(data)	((data)->features & FEAT_SIX_PWM)
+#define has_pwm_freq2(data)	((data)->features & FEAT_PWM_FREQ2)
+#define has_four_temp(data)	((data)->features & FEAT_FOUR_TEMP)
+#define has_six_temp(data)	((data)->features & FEAT_SIX_TEMP)
+#define has_vin3_5v(data)	((data)->features & FEAT_VIN3_5V)
+#define has_conf_noexit(data)	((data)->features & FEAT_CONF_NOEXIT)
 #define has_scaling(data)	((data)->features & (FEAT_12MV_ADC | \
 						     FEAT_10_9MV_ADC | \
 						     FEAT_11MV_ADC))
 #define has_fanctl_onoff(data)	((data)->features & FEAT_FANCTL_ONOFF)
-#define has_11mv_adc(data)	((data)->features & FEAT_11MV_ADC)
 #define has_new_tempmap(data)	((data)->features & FEAT_NEW_TEMPMAP)
+#define has_bank_sel(data)	((data)->features & FEAT_BANK_SEL)
 #define has_mmio(data)		((data)->features & FEAT_MMIO)
-#define has_four_temp(data)	((data)->features & FEAT_FOUR_TEMP)
-#define has_conf_noexit(data)	((data)->features & FEAT_CONF_NOEXIT)
 
 struct it87_sio_data {
 	enum chips type;
@@ -4450,7 +4450,7 @@ static struct it87_dmi_data it87_acpi_ignore = {
 };
 
 #define IT87_DMI_MATCH_VND(vendor, name, cb, data) \
-        { \
+	{ \
 		.callback = cb, \
 		.matches = { \
 			DMI_EXACT_MATCH(DMI_BOARD_VENDOR, vendor), \
