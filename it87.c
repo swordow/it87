@@ -4470,6 +4470,9 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 		/* ? + IT8792E/IT8795E */
 	IT87_DMI_MATCH_GBT("AX370", it87_sio_force, NULL),
 		/* ? + IT8792E/IT8795E */
+	IT87_DMI_MATCH_GBT("A520I AC", it87_dmi_cb,
+			   &it87_acpi_ignore),
+		/* IT8688E */
 	IT87_DMI_MATCH_GBT("Z97X-Gaming G1", it87_sio_force, NULL),
 		/* ? + IT8790E */
 	IT87_DMI_MATCH_GBT("TRX40 AORUS XTREME", it87_sio_force,
