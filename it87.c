@@ -83,7 +83,7 @@ enum chips { it87, it8712, it8716, it8718, it8720, it8721, it8728, it8732,
 	     it8736, it8738,
 	     it8771, it8772, it8781, it8782, it8783, it8786, it8790,
 	     it8792, it8603, it8606, it8607, it8613, it8620, it8622, it8625,
-	     it8628, it8655, it8665, it8686, it8688, it8689, it87952 };
+	     it8628, it8655, it8665, it8686, it8688, it8689, it87922, it87952 };
 
 static struct platform_device *it87_pdev[2];
 
@@ -776,10 +776,11 @@ static const struct it87_devices it87_devices[] = {
 	},
 	[it87922] = {
 		.name = "it87922",
-		.model = "IT87922E",
-		.features = FEAT_NEWER_AUTOPWM | FEAT_10_9MV_ADC | FEAT_SCALING
+		.model = "IT87922E (TBC)",
+		.features = FEAT_NEWER_AUTOPWM | FEAT_10_9MV_ADC
 		  | FEAT_16BIT_FANS | FEAT_TEMP_PECI
-		  | FEAT_IN7_INTERNAL | FEAT_PWM_FREQ2 | FEAT_FANCTL_ONOFF,
+		  | FEAT_IN7_INTERNAL | FEAT_PWM_FREQ2 | FEAT_FANCTL_ONOFF
+		  | FEAT_CONF_NOEXIT,
 		.num_temp_limit = 3,
 		.num_temp_offset = 3,
 		.num_temp_map = 3,
@@ -3220,7 +3221,6 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 		break;
 	case IT87922E_DEVID:
 		sio_data->type = it87922;
-		doexit = false;    /* See IT8792E comment above */
 		break;
 	case 0xffff:	/* No device at all */
 		goto exit;
@@ -4524,27 +4524,9 @@ static const struct dmi_system_id it87_dmi_table[] __initconst = {
 	IT87_DMI_MATCH_GBT("X670 AORUS ELITE AX", it87_sio_force,
 			   &it87_acpi_ignore),
 		/* IT8689E + IT87952E */
-<<<<<<< HEAD
-		.driver_data = &gigabyte_sio2_and_acpi,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "X670E AORUS MASTER"),
-		},
-		/* IT8689E + IT87922E */
-		.driver_data = &gigabyte_sio2_and_acpi,
-	},
-	{
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR,
-				  "Gigabyte Technology Co., Ltd."),
-			DMI_MATCH(DMI_BOARD_NAME, "Z690 AORUS PRO DDR4"),
-		},
-	IT87_DMI_MATCH_GBT("X670E AORUS MASTER", it87_dmi_cb,
+	IT87_DMI_MATCH_GBT("X670E AORUS MASTER", it87_sio_force,
 			   &it87_acpi_ignore),
-		/* IT8689E - Note there may also be a second chip */
+		/* IT8689E + IT87922E */
 	IT87_DMI_MATCH_GBT("Z690 AORUS PRO DDR4", it87_sio_force,
 			   &it87_acpi_ignore),
 		/* IT8689E + IT87952E */
