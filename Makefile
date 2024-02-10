@@ -29,7 +29,7 @@ endif
 
 DRIVER := it87
 ifneq ("","$(wildcard .git/*)")
-DRIVER_VERSION := $(shell git describe --long)
+DRIVER_VERSION := $(shell git describe --long).$(shell date -d "$(git show -s --format=%ci HEAD)" +%Y%m%d)
 else
 ifneq ("", "$(wildcard VERSION)")
 DRIVER_VERSION := $(shell cat VERSION)
@@ -89,17 +89,16 @@ endif
 	depmod -a -F $(SYSTEM_MAP) $(TARGET)
 
 dkms:
-	@sed -i -e '/^PACKAGE_VERSION=/ s/=.*/=\"$(DRIVER_VERSION)\"/' dkms.conf
-	@echo "$(DRIVER_VERSION)" >VERSION
 	@mkdir -p $(DKMS_ROOT_PATH)
-	@cp `pwd`/dkms.conf $(DKMS_ROOT_PATH)
-	@cp `pwd`/VERSION $(DKMS_ROOT_PATH)
-	@cp `pwd`/Makefile $(DKMS_ROOT_PATH)
-	@cp `pwd`/compat.h $(DKMS_ROOT_PATH)
-	@cp `pwd`/it87.c $(DKMS_ROOT_PATH)
+	@cp ./dkms.conf $(DKMS_ROOT_PATH)
+	@cp ./Makefile $(DKMS_ROOT_PATH)
+	@cp ./compat.h $(DKMS_ROOT_PATH)
+	@cp ./it87.c $(DKMS_ROOT_PATH)
+	@sed -i -e '/^PACKAGE_VERSION=/ s/=.*/=\"$(DRIVER_VERSION)\"/' $(DKMS_ROOT_PATH)/dkms.conf
+	@echo "$(DRIVER_VERSION)" >$(DKMS_ROOT_PATH)/VERSION
 	@dkms add -m $(DRIVER) -v $(DRIVER_VERSION)
-	@dkms build -m $(DRIVER) -v $(DRIVER_VERSION) --kernelsourcedir=$(KERNEL_BUILD)
-	@dkms install --force -m $(DRIVER) -v $(DRIVER_VERSION)
+	@dkms build -m $(DRIVER) -v $(DRIVER_VERSION) -k $(TARGET)
+	@dkms install --force -m $(DRIVER) -v $(DRIVER_VERSION) -k $(TARGET)
 	@modprobe $(DRIVER)
 
 dkms_clean:

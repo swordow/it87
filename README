@@ -48,10 +48,23 @@ Currently supported devices (from it87.c) are:
  *            IT8786E  Super I/O chip w/LPC interface
  *            IT8790E  Super I/O chip w/LPC interface
  *            IT8792E  Super I/O chip w/LPC interface
+ *            IT87952E  Super I/O chip w/LPC interface
  *            Sis950   A clone of the IT8705F
 
+Updated Module Parameters
+-------------------------
+
+* force_id [short, short]
+
+  Force multiple chip ID to specified value, separated by `,'.
+  For example "force_id=0x8689,0x8633".  A value of 0 is ignored
+  for that chip.
+  Note: A single force_id value (e.g. "force_id=0x8689") is used for
+  all chips, to only set the first chip use "force_id=0x8689,0".
+  Should only be used for testing.
+
 Frank Crawford
-Sep 2022
+Jan 2023
 
 The original README is below.
 ---------------------------------------------------------------------

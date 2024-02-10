@@ -9,13 +9,9 @@ fi
 
 DRV_NAME=$(basename $(pwd))
 DRV_VERSION=$(git describe --long).$(date -d "$(git show -s --format=%ci HEAD)" +%Y%m%d)
+DKMS_DIR=/usr/src/${DRV_NAME}-${DRV_VERSION}
 
-cp -r . /usr/src/${DRV_NAME}-${DRV_VERSION}
-
-dkms add -m ${DRV_NAME} -v ${DRV_VERSION}
-dkms build -m ${DRV_NAME} -v ${DRV_VERSION}
-dkms install -m ${DRV_NAME} -v ${DRV_VERSION}
-RESULT=$?
+make -f Makefile DRIVER=$DRV_NAME DRIVER_VERSION=$DRV_VERSION DKMS_ROOT_PATH=$DKMS_DIR dkms
 
 echo "Finished running dkms install steps."
 
