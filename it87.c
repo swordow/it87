@@ -4430,6 +4430,7 @@ static int it87_dmi_cb(const struct dmi_system_id *dmi_entry)
  */
 static int it87_sio_force(const struct dmi_system_id *dmi_entry)
 {
+	pr_info("Entering config for second chip\n");
 	__superio_enter(REG_4E);
 
 	return it87_dmi_cb(dmi_entry);
