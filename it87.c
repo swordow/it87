@@ -3232,7 +3232,7 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 	config = &it87_devices[sio_data->type];
 
 	superio_select(sioaddr, PME);
-	if (!(superio_inb(sioaddr, IT87_ACT_REG) & 0x01)) {
+	if (!(superio_inb(sioaddr, IT87_ACT_REG) & 0x01) && (sio_data->type != it87922)) {
 		pr_info("Device (chip %s ioreg 0x%x) not activated, skipping\n",
 			config->model, sioaddr);
 		goto exit;
