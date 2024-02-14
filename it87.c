@@ -101,6 +101,9 @@ static struct platform_device *it87_pdev[2];
 
 static inline void __superio_enter(int ioreg)
 {
+	/* Special for IT87922E */
+	if (ioreg == REG_4E)
+		return;
 	outb(0x87, ioreg);
 	outb(0x01, ioreg);
 	outb(0x55, ioreg);
@@ -777,7 +780,7 @@ static const struct it87_devices it87_devices[] = {
 	[it87922] = {
 		.name = "it87922",
 		.model = "IT87922E (TBC)",
-		.features = FEAT_NEWER_AUTOPWM | FEAT_10_9MV_ADC
+		.features = FEAT_NEWER_AUTOPWM | FEAT_11MV_ADC
 		  | FEAT_16BIT_FANS | FEAT_TEMP_PECI
 		  | FEAT_IN7_INTERNAL | FEAT_PWM_FREQ2 | FEAT_FANCTL_ONOFF
 		  | FEAT_CONF_NOEXIT,
@@ -3232,7 +3235,7 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 	config = &it87_devices[sio_data->type];
 
 	superio_select(sioaddr, PME);
-	if (!(superio_inb(sioaddr, IT87_ACT_REG) & 0x01) && (sio_data->type != it87922)) {
+	if (!(superio_inb(sioaddr, IT87_ACT_REG) & 0x01)) {
 		pr_info("Device (chip %s ioreg 0x%x) not activated, skipping\n",
 			config->model, sioaddr);
 		goto exit;
