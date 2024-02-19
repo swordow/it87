@@ -190,7 +190,6 @@ static inline void superio_exit(int ioreg, bool noexit)
 #define IT8688E_DEVID 0x8688
 #define IT8689E_DEVID 0x8689
 #define IT87952E_DEVID 0x8695
-#define IT87922E_DEVID 0x8883
 
 /* Logical device 4 (Environmental Monitor) registers */
 #define IT87_ACT_REG  0x30
@@ -597,7 +596,7 @@ static const struct it87_devices it87_devices[] = {
 	[it8792] = {
 		.name = "it8792",
 		.model = "IT8792E/IT8795E",
-		.features = FEAT_NEWER_AUTOPWM | FEAT_10_9MV_ADC
+		.features = FEAT_NEWER_AUTOPWM | FEAT_11MV_ADC
 		  | FEAT_16BIT_FANS | FEAT_TEMP_PECI
 		  | FEAT_IN7_INTERNAL | FEAT_PWM_FREQ2 | FEAT_FANCTL_ONOFF
 		  | FEAT_CONF_PREOPEN,
@@ -3821,6 +3820,8 @@ static void it87_init_regs(struct platform_device *pdev)
 	case it8625:
 	case it8655:
 	case it8665:
+	case it8792:
+	case it87952:
 		data->REG_FAN = IT87_REG_FAN_8665;
 		data->REG_FANX = IT87_REG_FANX_8665;
 		data->REG_FAN_MIN = IT87_REG_FAN_MIN_8665;
