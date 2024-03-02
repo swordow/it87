@@ -3820,8 +3820,6 @@ static void it87_init_regs(struct platform_device *pdev)
 	case it8625:
 	case it8655:
 	case it8665:
-	case it8792:
-	case it87952:
 		data->REG_FAN = IT87_REG_FAN_8665;
 		data->REG_FANX = IT87_REG_FANX_8665;
 		data->REG_FAN_MIN = IT87_REG_FAN_MIN_8665;
