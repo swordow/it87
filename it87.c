@@ -3252,8 +3252,10 @@ static int __init it87_find(int sioaddr, unsigned short *address,
 	 *
 	 * I don't know if any such chips can exist but be defensive.
 	 */
-	if (!opened && !has_conf_preopen(config))
+	if (!opened && !has_conf_preopen(config)) {
 		__superio_enter(sioaddr);
+		opened = true;
+	}
 
 	superio_select(sioaddr, PME);
 	if (!(superio_inb(sioaddr, IT87_ACT_REG) & 0x01)) {
